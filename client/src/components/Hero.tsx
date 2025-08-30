@@ -28,7 +28,7 @@ const Hero = () => {
               </Link>
             </Button>
             <Button variant="outline" size="lg" asChild className="shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-              <Link to="/explore">Explore Articles</Link>
+              <Link to="/collections">My Collections</Link>
             </Button>
           </div>
           
