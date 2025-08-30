@@ -19,6 +19,7 @@ export interface IBlog extends Document {
   comments_coll: IComment[];
   published_at: Date;
   created_at: Date;
+  updated_at: Date;
   status: 'pending' | 'approved' | 'rejected';
 }
 
@@ -99,6 +100,10 @@ const blogSchema = new Schema<IBlog>({
     type: Date,
     default: Date.now
   },
+  updated_at: {
+    type: Date,
+    default: Date.now
+  },
   status: {
     type: String,
     enum: ['pending', 'approved', 'rejected'],
@@ -112,6 +117,12 @@ blogSchema.index({ user_id: 1, created_at: -1 });
 blogSchema.index({ status: 1, published_at: -1 });
 blogSchema.index({ tags: 1 });
 blogSchema.index({ views: -1 });
+
+// Update the updated_at field before saving
+blogSchema.pre('save', function(next) {
+  this.updated_at = new Date();
+  next();
+});
 
 const Blog = mongoose.models.Blog || mongoose.model<IBlog>('Blog', blogSchema);
 

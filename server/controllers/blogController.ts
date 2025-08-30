@@ -149,15 +149,19 @@ export const getUserBlogs = async (req: Request, res: Response) => {
 export const getBlog = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const userId = (req as any).userId;
+    const userId = (req as any).userId; // May be undefined for public access
+    
     const blog = await Blog.findById(id).populate('comments_coll.user_id', 'name');
     if (!blog) return res.status(404).json({ success: false, message: 'Blog not found' });
-    if (blog.status !== 'approved' && blog.user_id.toString() !== userId) {
-      return res.status(403).json({ success: false, message: 'Forbidden' });
-    }
     
-    // Increment views if it's an approved blog
-    if (blog.status === 'approved') {
+    // Check access permissions
+    if (blog.status !== 'approved') {
+      // Only the author can view non-approved blogs
+      if (!userId || blog.user_id.toString() !== userId) {
+        return res.status(403).json({ success: false, message: 'Blog not available' });
+      }
+    } else {
+      // Increment views for approved blogs (only for public viewing)
       blog.views += 1;
       await blog.save();
     }

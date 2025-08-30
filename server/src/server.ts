@@ -22,7 +22,9 @@ app.use(cookieParser());
 
 // CORS configuration (SINGLE middleware) -----------------------------------
 // Include all dev client origins you might use. You can adjust CLIENT_URL in .env
-const allowedOrigins: string[] = ["http://localhost:8080"];
+const allowedOrigins: string[] = [
+  process.env.CLIENT_URL || 'http://localhost:3000',
+];
 console.log(allowedOrigins);
 
 app.use(
