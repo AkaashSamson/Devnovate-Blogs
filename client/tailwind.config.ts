@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from "tailwindcss-animate";
 
 export default {
 	darkMode: ["class"],
@@ -85,13 +86,27 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'subtle-pulse': {
+					'0%, 100%': {
+						opacity: '1'
+					},
+					'50%': {
+						opacity: '0.8'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'subtle-pulse': 'subtle-pulse 3s ease-in-out infinite'
+			},
+			backgroundImage: {
+				'gradient-hero': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+				'gradient-primary': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+				'gradient-text': 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)'
 			}
 		}
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [tailwindcssAnimate],
 } satisfies Config;
