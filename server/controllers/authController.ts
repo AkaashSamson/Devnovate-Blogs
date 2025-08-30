@@ -81,7 +81,8 @@ export const register = async (req: Request, res: Response) => {
                 id: user._id,
                 name: user.name,
                 email: user.email,
-                isAccountVerified: user.isAccountVerified
+                isAccountVerified: user.isAccountVerified,
+                isAdmin: user.isAdmin
             }
         });
 
@@ -141,7 +142,8 @@ export const login = async (req: Request, res: Response) => {
                 id: user._id,
                 name: user.name,
                 email: user.email,
-                isAccountVerified: user.isAccountVerified
+                isAccountVerified: user.isAccountVerified,
+                isAdmin: user.isAdmin
             }
         });
 
@@ -357,6 +359,7 @@ export const getProfile = async (req: Request, res: Response) => {
                 name: user.name,
                 email: user.email,
                 isAccountVerified: user.isAccountVerified,
+                isAdmin: user.isAdmin,
                 createdAt: user.createdAt
             }
         });

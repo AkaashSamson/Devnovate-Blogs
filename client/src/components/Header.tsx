@@ -1,13 +1,13 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, PenTool, User, LogIn, LogOut } from "lucide-react";
+import { Search, PenTool, User, LogIn, LogOut, Shield } from "lucide-react";
 import { useAppContext } from "@/context/AppContext";
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
 
 const Header = () => {
-  const { isLoggedIn, setIsLoggedIn, setUser, backendUrl } = useAppContext();
+  const { isLoggedIn, setIsLoggedIn, setUser, setIsAdmin, isAdmin, backendUrl } = useAppContext();
   const { toast } = useToast();
 
   const handleLogout = async () => {
@@ -17,6 +17,7 @@ const Header = () => {
       
       setIsLoggedIn(false);
       setUser(null);
+      setIsAdmin(false);
       
       toast({
         title: "Logged out successfully",
@@ -27,6 +28,7 @@ const Header = () => {
       // Even if logout fails on backend, clear frontend state
       setIsLoggedIn(false);
       setUser(null);
+      setIsAdmin(false);
       
       toast({
         title: "Logged out",
@@ -67,6 +69,14 @@ const Header = () => {
           <Button variant="gradient" asChild>
             <Link to="/write">Write</Link>
           </Button>
+          {isAdmin && (
+            <Button variant="outline" asChild>
+              <Link to="/admin-dashboard">
+                <Shield className="h-4 w-4 mr-2" />
+                Dashboard
+              </Link>
+            </Button>
+          )}
           {isLoggedIn ? (
             <Button variant="ghost" size="icon" asChild>
               <Link to="/profile">
