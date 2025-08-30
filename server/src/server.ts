@@ -1,33 +1,50 @@
 import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
+import 'dotenv/config';
+import cookieParser from 'cookie-parser';
+import connectDB from '../config/mongodb';
+import authRoutes from '../routes/authRoutes';
+import userRoutes from '../routes/userRoutes';
+import blogRoutes from '../routes/blogRoutes';
 
-dotenv.config();
+// dotenv.config();
 
 const app: Express = express();
+const PORT: string | number = process.env.PORT || 4000;
+connectDB();
 
-app.use(cors());
+// Parse request bodies & cookies early
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
-const uri: string =
-    process.env.MONGODB_URI || 'mongodb://localhost:27017/your-app';
+// Connect to MongoDB
 
-(async () => {
-    try {
-        await mongoose.connect(uri);
-        console.log('Connected to the database');
-    } catch(error) {
-        console.error(error);
-    }
-})();
+
+// CORS configuration (SINGLE middleware) -----------------------------------
+// Include all dev client origins you might use. You can adjust CLIENT_URL in .env
+const allowedOrigins: string[] = ["http://localhost:8080"];
+console.log(allowedOrigins);
+
+app.use(
+  cors({
+   origin: allowedOrigins,
+   credentials: true
+  })
+);
+
+// (Removed manual app.options('*') handler; Express 5/path-to-regexp v6 rejects bare '*'.
+// The cors middleware above already responds to preflight requests.)
+
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/blogs', blogRoutes);
 
 app.get('/health', (_req: Request, res: Response) => {
     res.status(200).send('Server is running');
 });
 
-const PORT: string | number = process.env.PORT || 3000;
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on PORT: ${PORT}`);
