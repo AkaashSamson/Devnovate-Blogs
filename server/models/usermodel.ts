@@ -14,30 +14,47 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    bio: {
+        type: String,
+        default: '',
+        maxlength: 500
+    },
+    location: {
+        type: String,
+        default: ''
+    },
+    website: {
+        type: String,
+        default: ''
+    },
+    isAdmin: {
+        type: Boolean,
+        default: false
+    },
     createdAt: {
         type: Date,
         default: Date.now
     },
-        verifyOtp: {
-            type: String,
-            default: null
-        },
-        verifyOtpExpireAt: {
-            type: Number,
-            default: 0
-        },
-        isAccountVerified: {
-            type: Boolean,
-            default: false
-        },
-        resetOtp: {
-            type: String,
-            default: ''
-        },
-        resetOtpExpireAt: {
-            type: Number,
-            default: 0
-        }
+    verifyOtp: {
+        type: String,
+        default: null
+    },
+    verifyOtpExpireAt: {
+        type: Number,
+        default: 0
+    },
+    isAccountVerified: {
+        type: Boolean,
+        default: false
+    },
+    resetOtp: {
+        type: String,
+        default: ''
+    },
+    resetOtpExpireAt: {
+        type: Number,
+        default: 0
+    }
 });
 
 const User = mongoose.models.user || mongoose.model('User', userSchema);

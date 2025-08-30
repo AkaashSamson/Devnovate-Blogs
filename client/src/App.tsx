@@ -10,6 +10,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import Collections from "./pages/Collections";
 import BlogPost from "./pages/BlogPost";
 import Profile from "./pages/Profile";
+import EditProfile from "./pages/EditProfile";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
@@ -28,6 +29,7 @@ const App = () => (
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/blog/:id" element={<BlogPost />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/profile/edit" element={<EditProfile />} />
         <Route path="/admin" element={<AdminDashboard />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />

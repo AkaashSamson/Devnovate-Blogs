@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Edit, Eye, Clock, Heart, MessageCircle, Loader2 } from "lucide-react";
+import { Settings, Edit, Eye, Clock, Heart, MessageCircle, Loader2, User } from "lucide-react";
 import BlogCard from "@/components/BlogCard";
 import { useAppContext } from "@/context/AppContext";
 import { useToast } from "@/hooks/use-toast";
@@ -64,17 +64,18 @@ const Profile = () => {
   const displayUser = {
     name: profileData?.name || user?.name || "John Doe",
     email: profileData?.email || user?.email || "john.doe@example.com",
-    avatar: profileData?.avatar || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=128&h=128&fit=crop&crop=face`,
-    bio: profileData?.bio || "Full-stack developer passionate about sharing knowledge through writing. Building scalable web applications and exploring new technologies.",
+    bio: profileData?.bio || "",
     joinedDate: profileData?.createdAt ? new Date(profileData.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : "January 2024",
-    location: profileData?.location || "San Francisco, CA",
-    website: profileData?.website || "johndoe.dev",
+    location: profileData?.location || "",
+    website: profileData?.website || "",
+    isAdmin: profileData?.isAdmin || false,
     stats: {
-      articles: profileData?.stats?.articles || 8,
-      followers: profileData?.stats?.followers || 1420,
-      following: profileData?.stats?.following || 89,
-      totalViews: profileData?.stats?.totalViews || 15600,
-      totalLikes: profileData?.stats?.totalLikes || 892
+      articles: profileData?.stats?.articles || 0,
+      totalBlogs: profileData?.stats?.totalBlogs || 0,
+      followers: profileData?.stats?.followers || 0,
+      following: profileData?.stats?.following || 0,
+      totalViews: profileData?.stats?.totalViews || 0,
+      totalLikes: profileData?.stats?.totalLikes || 0
     }
   };
 
@@ -156,9 +157,8 @@ const Profile = () => {
           <Card className="p-8 bg-gradient-card shadow-medium">
             <div className="flex flex-col md:flex-row items-start md:items-center space-y-6 md:space-y-0 md:space-x-8">
               <Avatar className="h-24 w-24">
-                <AvatarImage src={displayUser.avatar} />
-                <AvatarFallback className="text-2xl">
-                  {displayUser.name.split(' ').map(n => n[0]).join('')}
+                <AvatarFallback className="text-2xl bg-muted">
+                  <User className="h-12 w-12" />
                 </AvatarFallback>
               </Avatar>
               
@@ -166,9 +166,11 @@ const Profile = () => {
                 <div className="flex items-center justify-between mb-4">
                   <h1 className="text-3xl font-bold">{displayUser.name}</h1>
                   <div className="flex space-x-2">
-                    <Button variant="outline" size="sm">
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit Profile
+                    <Button variant="outline" size="sm" asChild>
+                      <Link to="/profile/edit">
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit Profile
+                      </Link>
                     </Button>
                     <Button variant="ghost" size="sm">
                       <Settings className="h-4 w-4" />
@@ -176,25 +178,40 @@ const Profile = () => {
                   </div>
                 </div>
                 
-                <p className="text-muted-foreground mb-4 max-w-2xl">{displayUser.bio}</p>
+                {displayUser.bio ? (
+                  <p className="text-muted-foreground mb-4 max-w-2xl">{displayUser.bio}</p>
+                ) : (
+                  <p className="text-muted-foreground/60 mb-4 max-w-2xl italic">
+                    No bio available. <Link to="/profile/edit" className="text-primary hover:underline">Add one</Link>
+                  </p>
+                )}
                 
                 <div className="flex flex-wrap gap-6 text-sm">
                   <div>
                     <span className="text-muted-foreground">Joined:</span>
                     <span className="ml-2 font-medium">{displayUser.joinedDate}</span>
                   </div>
-                  <div>
-                    <span className="text-muted-foreground">Location:</span>
-                    <span className="ml-2 font-medium">{displayUser.location}</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Website:</span>
-                    <span className="ml-2 font-medium text-primary">{displayUser.website}</span>
-                  </div>
+                  {displayUser.location && (
+                    <div>
+                      <span className="text-muted-foreground">Location:</span>
+                      <span className="ml-2 font-medium">{displayUser.location}</span>
+                    </div>
+                  )}
+                  {displayUser.website && (
+                    <div>
+                      <span className="text-muted-foreground">Website:</span>
+                      <span className="ml-2 font-medium text-primary">{displayUser.website}</span>
+                    </div>
+                  )}
                   <div>
                     <span className="text-muted-foreground">Email:</span>
                     <span className="ml-2 font-medium">{displayUser.email}</span>
                   </div>
+                  {displayUser.isAdmin && (
+                    <div>
+                      <Badge variant="destructive">Admin</Badge>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

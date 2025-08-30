@@ -1,10 +1,11 @@
 import express from 'express';
-import { getCurrentUser } from '../controllers/userController';
+import { getCurrentUser, updateUserProfile } from '../controllers/userController';
 import { authMiddleware } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
-// Protected route to get current user
+// Protected routes
 router.get('/me', authMiddleware, getCurrentUser);
+router.put('/me', authMiddleware, updateUserProfile);
 
 export default router;
