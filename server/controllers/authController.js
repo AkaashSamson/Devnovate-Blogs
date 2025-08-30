@@ -136,41 +136,22 @@ const login = async (req, res) => {
         // Generate JWT token
         const token = generateToken(user._id);
 
-        // For production, send token in response instead of cookie
-        if (process.env.NODE_ENV === 'production') {
-            res.status(200).json({
-                success: true,
-                message: 'Login successful',
-                token: token, // Send token in response for production
-                user: {
-                    id: user._id,
-                    name: user.name,
-                    email: user.email,
-                    isAccountVerified: user.isAccountVerified,
-                    isAdmin: user.isAdmin
-                }
-            });
-        } else {
-            // Set cookie for development
-            res.cookie('token', token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-                maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-            });
+        console.log('NODE_ENV:', process.env.NODE_ENV);
+        console.log('Sending token in response for cross-domain compatibility');
 
-            res.status(200).json({
-                success: true,
-                message: 'Login successful',
-                user: {
-                    id: user._id,
-                    name: user.name,
-                    email: user.email,
-                    isAccountVerified: user.isAccountVerified,
-                    isAdmin: user.isAdmin
-                }
-            });
-        }
+        // Always send token in response for better cross-domain compatibility
+        res.status(200).json({
+            success: true,
+            message: 'Login successful',
+            token: token, // Always send token
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                isAccountVerified: user.isAccountVerified,
+                isAdmin: user.isAdmin
+            }
+        });
 
     } catch (error) {
         console.error('login error:', error);

@@ -30,10 +30,15 @@ export const loginUser = async (credentials: LoginCredentials): Promise<AuthResp
   try {
     const response = await apiClient.post('/auth/login', credentials);
     
+    console.log('Login response:', response.data);
+    
     if (response.data.success) {
       // Store token if provided (production)
       if (response.data.token) {
+        console.log('Storing token:', response.data.token.substring(0, 20) + '...');
         setAuthToken(response.data.token);
+      } else {
+        console.log('No token in response - using cookie auth');
       }
     }
     

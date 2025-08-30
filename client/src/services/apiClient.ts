@@ -20,7 +20,10 @@ apiClient.interceptors.request.use(
     // Add Authorization header if token exists (for production)
     const token = getAuthToken();
     if (token) {
+      console.log('Adding Authorization header with token:', token.substring(0, 20) + '...');
       config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      console.log('No token found in localStorage');
     }
     
     return config;

@@ -17,10 +17,13 @@ app.use(cookieParser());
 
 // Debug middleware for production troubleshooting
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.path}`);
-  console.log('Origin:', req.headers.origin);
-  console.log('Cookies:', req.headers.cookie ? 'Present' : 'Missing');
-  console.log('Auth header:', req.headers.authorization ? 'Present' : 'Missing');
+  // Only log non-health check requests to reduce noise
+  if (req.path !== '/' && req.path !== '/health') {
+    console.log(`${req.method} ${req.path}`);
+    console.log('Origin:', req.headers.origin);
+    console.log('Cookies:', req.headers.cookie ? 'Present' : 'Missing');
+    console.log('Auth header:', req.headers.authorization ? 'Present' : 'Missing');
+  }
   next();
 });
 
@@ -31,13 +34,15 @@ const allowedOrigins = [
   'https://devnovate-blogs-eta.vercel.app', // Add your deployed frontend URL
   'http://localhost:5173', // Vite dev server
   'http://localhost:3000'  // React dev server
-];
+].filter(Boolean); // Remove any undefined values
+
 console.log('Allowed origins:', allowedOrigins);
+console.log('NODE_ENV:', process.env.NODE_ENV);
 
 app.use(
   cors({
    origin: function (origin, callback) {
-     // Allow requests with no origin (like mobile apps or curl requests)
+     // Allow requests with no origin (like mobile apps, curl requests, or health checks)
      if (!origin) return callback(null, true);
      
      if (allowedOrigins.indexOf(origin) !== -1) {
