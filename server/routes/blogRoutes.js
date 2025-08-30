@@ -1,7 +1,7 @@
-import express from 'express';
-import { authMiddleware } from '../middleware/authMiddleware';
-import { optionalAuthMiddleware } from '../middleware/optionalAuthMiddleware';
-import {
+const express = require('express');
+const { authMiddleware } = require('../middleware/authMiddleware');
+const { optionalAuthMiddleware } = require('../middleware/optionalAuthMiddleware');
+const {
   createBlog,
   listApprovedBlogs,
   listPendingBlogs,
@@ -13,15 +13,17 @@ import {
   addComment,
   approveBlog,
   rejectBlog
-} from '../controllers/blogController';
+} = require('../controllers/blogController');
 
 const router = express.Router();
 
-// Public
-router.get('/', listApprovedBlogs);
-router.get('/:id', optionalAuthMiddleware, getBlog); // Allow public access with optional auth
+// Specific routes first (before parameterized routes)
 router.get('/pending', authMiddleware, listPendingBlogs); // Admin only  
 router.get('/my-blogs', authMiddleware, getUserBlogs); // User's own blogs
+
+// Public routes
+router.get('/', listApprovedBlogs);
+router.get('/:id', optionalAuthMiddleware, getBlog); // Allow public access with optional auth
 
 // Authenticated user routes
 router.post('/', authMiddleware, createBlog);
@@ -32,8 +34,8 @@ router.delete('/:id', authMiddleware, deleteBlog);
 router.post('/:id/like', authMiddleware, toggleLike);
 router.post('/:id/comments', authMiddleware, addComment);
 
-// Admin placeholders (should add real admin check later)
+// Admin routes
 router.post('/:id/approve', authMiddleware, approveBlog);
 router.post('/:id/reject', authMiddleware, rejectBlog);
 
-export default router;
+module.exports = router;

@@ -1,29 +1,7 @@
-import mongoose, { Schema, Document, Types } from 'mongoose';
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-export interface IComment {
-  user_id: Types.ObjectId;
-  text: string;
-  created_at: Date;
-}
-
-export interface IBlog extends Document {
-  title: string;
-  content: string;
-  excerpt: string;
-  user_id: Types.ObjectId;
-  author_name: string;
-  tags: string[];
-  featured_image?: string;
-  views: number;
-  likes_coll: Types.ObjectId[];
-  comments_coll: IComment[];
-  published_at: Date;
-  created_at: Date;
-  updated_at: Date;
-  status: 'pending' | 'approved' | 'rejected';
-}
-
-const commentSchema = new Schema<IComment>({
+const commentSchema = new Schema({
   user_id: {
     type: Schema.Types.ObjectId,
     ref: 'User',
@@ -42,7 +20,7 @@ const commentSchema = new Schema<IComment>({
   }
 });
 
-const blogSchema = new Schema<IBlog>({
+const blogSchema = new Schema({
   title: {
     type: String,
     required: true,
@@ -124,6 +102,6 @@ blogSchema.pre('save', function(next) {
   next();
 });
 
-const Blog = mongoose.models.Blog || mongoose.model<IBlog>('Blog', blogSchema);
+const Blog = mongoose.models.Blog || mongoose.model('Blog', blogSchema);
 
-export default Blog;
+module.exports = Blog;
