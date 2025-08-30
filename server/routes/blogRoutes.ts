@@ -3,6 +3,8 @@ import { authMiddleware } from '../middleware/authMiddleware';
 import {
   createBlog,
   listApprovedBlogs,
+  listPendingBlogs,
+  getUserBlogs,
   getBlog,
   updateBlog,
   deleteBlog,
@@ -16,6 +18,8 @@ const router = express.Router();
 
 // Public
 router.get('/', listApprovedBlogs);
+router.get('/pending', authMiddleware, listPendingBlogs); // Admin only
+router.get('/my-blogs', authMiddleware, getUserBlogs); // User's own blogs
 router.get('/:id', authMiddleware, getBlog); // require auth to view non-approved own drafts
 
 // Authenticated user routes

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -18,36 +18,42 @@ import {
   Clock
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAppContext } from "@/context/AppContext";
+import axios from "axios";
 
 const AdminDashboard = () => {
   const { toast } = useToast();
+  const { backendUrl, isAdmin } = useAppContext();
+  const [loading, setLoading] = useState(true);
   
-  const [pendingArticles, setPendingArticles] = useState([
-    {
-      id: "pending-1",
-      title: "Advanced React Patterns You Should Know",
-      excerpt: "Exploring render props, compound components, and other advanced React patterns for better code organization.",
-      author: {
-        name: "Sarah Chen",
-        avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=32&h=32&fit=crop&crop=face"
-      },
-      submittedAt: "2 hours ago",
-      tags: ["React", "Patterns", "Advanced"],
-      wordCount: 2500
-    },
-    {
-      id: "pending-2",
-      title: "Understanding TypeScript Generics",
-      excerpt: "A deep dive into TypeScript generics with practical examples and use cases.",
-      author: {
-        name: "Mike Rodriguez",
-        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face"
-      },
-      submittedAt: "1 day ago",
-      tags: ["TypeScript", "Generics", "Tutorial"],
-      wordCount: 3200
-    }
-  ]);
+  const [pendingArticles, setPendingArticles] = useState([]);
+
+  // Fetch pending articles from API
+  useEffect(() => {
+    const fetchPendingArticles = async () => {
+      if (!isAdmin) return;
+      
+      try {
+        axios.defaults.withCredentials = true;
+        const response = await axios.get(`${backendUrl}/blogs/pending`);
+        
+        if (response.data.success) {
+          setPendingArticles(response.data.blogs);
+        }
+      } catch (error) {
+        console.error('Error fetching pending articles:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load pending articles.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPendingArticles();
+  }, [backendUrl, isAdmin, toast]);
 
   const stats = {
     totalUsers: 10247,
@@ -56,21 +62,45 @@ const AdminDashboard = () => {
     monthlyViews: 450000
   };
 
-  const handleApprove = (articleId: string) => {
-    setPendingArticles(prev => prev.filter(article => article.id !== articleId));
-    toast({
-      title: "Article approved",
-      description: "The article has been published successfully.",
-    });
+  const handleApprove = async (articleId: string) => {
+    try {
+      axios.defaults.withCredentials = true;
+      await axios.post(`${backendUrl}/blogs/${articleId}/approve`);
+      
+      setPendingArticles(prev => prev.filter(article => article.id !== articleId));
+      toast({
+        title: "Article approved",
+        description: "The article has been published successfully.",
+      });
+    } catch (error) {
+      console.error('Error approving article:', error);
+      toast({
+        title: "Error",
+        description: "Failed to approve article.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleReject = (articleId: string) => {
-    setPendingArticles(prev => prev.filter(article => article.id !== articleId));
-    toast({
-      title: "Article rejected",
-      description: "The author has been notified of the rejection.",
-      variant: "destructive"
-    });
+  const handleReject = async (articleId: string) => {
+    try {
+      axios.defaults.withCredentials = true;
+      await axios.post(`${backendUrl}/blogs/${articleId}/reject`);
+      
+      setPendingArticles(prev => prev.filter(article => article.id !== articleId));
+      toast({
+        title: "Article rejected",
+        description: "The author has been notified of the rejection.",
+        variant: "destructive"
+      });
+    } catch (error) {
+      console.error('Error rejecting article:', error);
+      toast({
+        title: "Error", 
+        description: "Failed to reject article.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
