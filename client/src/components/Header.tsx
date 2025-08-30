@@ -12,8 +12,8 @@ const Header = () => {
           <div className="bg-gradient-primary p-2 rounded-lg">
             <PenTool className="h-6 w-6 text-primary-foreground" />
           </div>
-          <span className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-            Devnovate
+          <span className="text-2xl font-bold bg-gradient-text bg-clip-text text-transparent block">
+            Devnovate    
           </span>
         </Link>
 
