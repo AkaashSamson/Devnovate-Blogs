@@ -1,54 +1,64 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Search, PenTool, User, LogIn } from "lucide-react";
+import { PenTool, User, LogIn, Home, Flame, PencilLine } from "lucide-react";
 
 const Header = () => {
   return (
-    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b shadow-soft">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Logo */}
-        <Link to="/" className="flex items-center space-x-2">
-          <div className="bg-gradient-primary p-2 rounded-lg">
-            <PenTool className="h-6 w-6 text-primary-foreground" />
+    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          
+          {/* Logo */}
+          <Link to="/" className="flex items-center space-x-2 cursor-pointer">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <PenTool className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-xl font-bold text-gray-900">Devnovate</span>
+          </Link>
+
+          {/* Navigation Links */}
+          <div className="hidden md:flex items-center space-x-20">
+            <Link
+              to="/"
+              className="flex items-center text-gray-700 hover:text-blue-600 transition-colors"
+            >
+              <Home className="w-4 h-4 mr-1" />
+              Home
+            </Link>
+            <Link
+              to="/trending"
+              className="flex items-center text-gray-700 hover:text-blue-600 transition-colors"
+            >
+              <Flame className="w-4 h-4 mr-1" />
+              Trending
+            </Link>
+            <Link
+              to="/write"
+              className="flex items-center text-gray-700 hover:text-blue-600 transition-colors"
+            >
+              <PencilLine className="w-4 h-4 mr-1" />
+              Write
+            </Link>
           </div>
-          <span className="text-2xl font-bold text-white bg-gradient-to-r from-purple-500 to-pink-500 px-3 py-1 rounded-lg">
-            Devnovate
-          </span>
 
-        </Link>
-
-        {/* Search Bar */}
-        <div className="hidden md:flex flex-1 max-w-md mx-8">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Search articles..." 
-              className="pl-10 bg-muted/50"
-            />
+          {/* User Actions */}
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" asChild>
+              <Link to="/profile">
+                <User className="w-4 h-4 mr-2" />
+                Profile
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/login">
+                <LogIn className="w-4 h-4 mr-2" />
+                Login
+              </Link>
+            </Button>
           </div>
         </div>
-
-        {/* Navigation */}
-        <nav className="flex items-center space-x-4">
-          <Button variant="ghost" asChild>
-            <Link to="/trending">Trending</Link>
-          </Button>
-          <Button variant="ghost" asChild>
-            <Link to="/write">Write</Link>
-          </Button>
-          <Button variant="ghost" size="icon">
-            <User className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" asChild>
-            <Link to="/login">
-              <LogIn className="h-4 w-4 mr-2" />
-              Login
-            </Link>
-          </Button>
-        </nav>
       </div>
-    </header>
+    </nav>
   );
 };
 

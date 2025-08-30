@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -154,7 +155,9 @@ const Profile = () => {
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold">Published Articles</h2>
               <Button variant="gradient">
+                <Link to="/write">
                 Write New Article
+                </Link>
               </Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
