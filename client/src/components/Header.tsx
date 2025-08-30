@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, PenTool, User, LogIn, Home, TrendingUp, PencilLine, Menu } from "lucide-react";
+import { Search, PenTool, User, LogIn, LogOut, Shield, Home, TrendingUp, PencilLine, Menu } from "lucide-react";
 import { useAppContext } from "@/context/AppContext";
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
@@ -9,7 +9,7 @@ import { useState } from "react";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { isLoggedIn, setIsLoggedIn, setUser, backendUrl } = useAppContext();
+  const { isLoggedIn, setIsLoggedIn, setUser, setIsAdmin, isAdmin, backendUrl } = useAppContext();
   const { toast } = useToast();
 
   const handleLogout = async () => {
@@ -19,6 +19,7 @@ const Header = () => {
       
       setIsLoggedIn(false);
       setUser(null);
+      setIsAdmin(false);
       
       toast({
         title: "Logged out successfully",
@@ -29,6 +30,7 @@ const Header = () => {
       // Even if logout fails on backend, clear frontend state
       setIsLoggedIn(false);
       setUser(null);
+      setIsAdmin(false);
       
       toast({
         title: "Logged out",
@@ -88,6 +90,14 @@ const Header = () => {
 
           {/* User Actions */}
           <div className="flex items-center space-x-3">
+            {isAdmin && (
+              <Button variant="outline" asChild className="hidden sm:flex">
+                <Link to="/admin-dashboard">
+                  <Shield className="h-4 w-4 mr-2" />
+                  Dashboard
+                </Link>
+              </Button>
+            )}
             {isLoggedIn ? (
               <>
                 <Button 
@@ -105,6 +115,7 @@ const Header = () => {
                   onClick={handleLogout}
                   className="hover:bg-red-50 hover:text-red-600 transition-all duration-200"
                 >
+                  <LogOut className="w-4 h-4 mr-2" />
                   Logout
                 </Button>
               </>
@@ -158,6 +169,15 @@ const Header = () => {
                 <PencilLine className="w-4 h-4 mr-3" />
                 <span>Write</span>
               </Link>
+              {isAdmin && (
+                <Link
+                  to="/admin-dashboard"
+                  className="flex items-center text-gray-700 hover:text-purple-600 transition-all duration-200 px-3 py-2 rounded-lg hover:bg-gray-50"
+                >
+                  <Shield className="w-4 h-4 mr-3" />
+                  <span>Dashboard</span>
+                </Link>
+              )}
               {isLoggedIn ? (
                 <>
                   <Link
@@ -171,7 +191,7 @@ const Header = () => {
                     onClick={handleLogout}
                     className="flex items-center text-gray-700 hover:text-red-600 transition-all duration-200 px-3 py-2 rounded-lg hover:bg-gray-50 text-left"
                   >
-                    <LogIn className="w-4 h-4 mr-3" />
+                    <LogOut className="w-4 h-4 mr-3" />
                     <span>Logout</span>
                   </button>
                 </>

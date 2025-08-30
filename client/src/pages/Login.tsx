@@ -19,14 +19,13 @@ const Login = () => {
     name: ""
   });
   const { toast } = useToast();
-  const { backendUrl, setUser, setIsLoggedIn, setLoading, loading } = useAppContext();
+  const { backendUrl, setUser, setIsLoggedIn, setIsAdmin, setLoading, loading } = useAppContext();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    
+    e.preventDefault();
     setLoading(true);
     try {
-      e.preventDefault();
       axios.defaults.withCredentials = true;
       const endpoint = isLogin ? `${backendUrl}/auth/login` : `${backendUrl}/auth/register`;
       const payload = isLogin
@@ -36,9 +35,16 @@ const Login = () => {
       const { data } = await axios.post(endpoint, payload);
 
       if (data?.user) {
-        setUser({ id: data.user.id, name: data.user.name, email: data.user.email });
+        setUser({ id: data.user.id, name: data.user.name, email: data.user.email, isAdmin: data.user.isAdmin });
         setIsLoggedIn(true);
-        navigate('/');
+        setIsAdmin(data.user.isAdmin || false);
+        
+        // Redirect based on admin status
+        if (data.user.isAdmin) {
+          navigate('/admin-dashboard');
+        } else {
+          navigate('/');
+        }
       }
 
       toast({
