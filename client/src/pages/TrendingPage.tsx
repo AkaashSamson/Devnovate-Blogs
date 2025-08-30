@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import Header from "@/components/Header";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Heart, MessageCircle, Eye, TrendingUp, Search } from "lucide-react";
 import { useAppContext } from "@/context/AppContext";
 import { useToast } from "@/hooks/use-toast";
+import apiClient from "@/services/apiClient";
 
 // Blog interface
 interface Blog {
@@ -38,7 +38,6 @@ const TrendingPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
-  const { backendUrl } = useAppContext();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -46,8 +45,7 @@ const TrendingPage: React.FC = () => {
   useEffect(() => {
     const fetchTrendingBlogs = async () => {
       try {
-        axios.defaults.withCredentials = true;
-        const response = await axios.get(`${backendUrl}/blogs/trending`);
+        const response = await apiClient.get('/blogs/trending');
         
         if (response.data.success) {
           // Add default featured image if missing
@@ -72,7 +70,7 @@ const TrendingPage: React.FC = () => {
     };
 
     fetchTrendingBlogs();
-  }, [backendUrl, toast]);
+  }, [toast]);
 
   // Handle blog click
   const handleBlogClick = (blogId: string) => {

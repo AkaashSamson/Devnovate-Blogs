@@ -13,7 +13,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useAppContext } from "@/context/AppContext";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
+import apiClient from "@/services/apiClient";
 
 const Write = () => {
   const [title, setTitle] = useState("");
@@ -28,7 +29,7 @@ const Write = () => {
   const [isDragOver, setIsDragOver] = useState(false);
   
   const { toast } = useToast();
-  const { isLoggedIn, user, backendUrl, loading } = useAppContext();
+  const { isLoggedIn, user, loading } = useAppContext();
   const navigate = useNavigate();
 
   // Redirect to login if not authenticated
@@ -82,8 +83,7 @@ const Write = () => {
       const formData = new FormData();
       formData.append('image', file);
 
-      const response = await axios.post(`${backendUrl}/upload/image`, formData, {
-        withCredentials: true,
+      const response = await apiClient.post('/upload/image', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
@@ -173,7 +173,6 @@ const Write = () => {
 
     setIsSubmitting(true);
     try {
-      axios.defaults.withCredentials = true;
       const blogData = {
         title: title.trim(),
         excerpt: excerpt.trim(),
@@ -182,7 +181,7 @@ const Write = () => {
         featured_image: featuredImage.trim() || undefined,
       };
 
-      const response = await axios.post(`${backendUrl}/blogs`, blogData);
+      const response = await apiClient.post('/blogs', blogData);
       
       if (response.data.success) {
         toast({
@@ -233,7 +232,6 @@ const Write = () => {
 
     setIsSubmitting(true);
     try {
-      axios.defaults.withCredentials = true;
       const blogData = {
         title: title.trim(),
         excerpt: excerpt.trim(),
@@ -242,7 +240,7 @@ const Write = () => {
         featured_image: featuredImage.trim() || undefined,
       };
 
-      const response = await axios.post(`${backendUrl}/blogs`, blogData);
+      const response = await apiClient.post('/blogs', blogData);
       
       if (response.data.success) {
         toast({

@@ -1,4 +1,77 @@
 import apiClient from './apiClient';
+import { setAuthToken, removeAuthToken } from './tokenService';
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface RegisterData {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  message: string;
+  token?: string;
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+    isAccountVerified: boolean;
+    isAdmin: boolean;
+  };
+}
+
+// Login user
+export const loginUser = async (credentials: LoginCredentials): Promise<AuthResponse> => {
+  try {
+    const response = await apiClient.post('/auth/login', credentials);
+    
+    if (response.data.success) {
+      // Store token if provided (production)
+      if (response.data.token) {
+        setAuthToken(response.data.token);
+      }
+    }
+    
+    return response.data;
+  } catch (error: any) {
+    throw error.response?.data || { success: false, message: 'Login failed' };
+  }
+};
+
+// Register user
+export const registerUser = async (userData: RegisterData): Promise<AuthResponse> => {
+  try {
+    const response = await apiClient.post('/auth/register', userData);
+    
+    if (response.data.success) {
+      // Store token if provided (production)
+      if (response.data.token) {
+        setAuthToken(response.data.token);
+      }
+    }
+    
+    return response.data;
+  } catch (error: any) {
+    throw error.response?.data || { success: false, message: 'Registration failed' };
+  }
+};
+
+// Logout user
+export const logoutUser = async (): Promise<void> => {
+  try {
+    await apiClient.post('/auth/logout');
+  } catch (error) {
+    console.error('Logout error:', error);
+  } finally {
+    // Always remove token from localStorage
+    removeAuthToken();
+  }
+};
 
 // Check if user is authenticated by calling /me endpoint
 export const checkAuthStatus = async () => {
@@ -20,6 +93,8 @@ export const checkAuthStatus = async () => {
     };
   } catch (error) {
     console.log('Auth check failed:', error);
+    // Clear invalid token
+    removeAuthToken();
     return {
       isAuthenticated: false,
       user: null,

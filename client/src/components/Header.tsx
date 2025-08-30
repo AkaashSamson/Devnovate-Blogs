@@ -4,19 +4,18 @@ import { Input } from "@/components/ui/input";
 import { Search, PenTool, User, LogIn, LogOut, Shield, Home, TrendingUp, PencilLine, Menu } from "lucide-react";
 import { useAppContext } from "@/context/AppContext";
 import { useToast } from "@/hooks/use-toast";
-import axios from "axios";
 import { useState } from "react";
+import { logoutUser } from "@/services/authService";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { isLoggedIn, setIsLoggedIn, setUser, setIsAdmin, isAdmin, backendUrl } = useAppContext();
+  const { isLoggedIn, setIsLoggedIn, setUser, setIsAdmin, isAdmin } = useAppContext();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
-      axios.defaults.withCredentials = true;
-      await axios.post(`${backendUrl}/auth/logout`);
+      await logoutUser();
       
       setIsLoggedIn(false);
       setUser(null);

@@ -7,8 +7,9 @@ import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { PenTool, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import { useAppContext } from "@/context/AppContext";
+import { loginUser, registerUser } from "@/services/authService";
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -19,28 +20,39 @@ const Login = () => {
     name: ""
   });
   const { toast } = useToast();
-  const { backendUrl, setUser, setIsLoggedIn, setIsAdmin, setLoading, loading } = useAppContext();
+  const { setUser, setIsLoggedIn, setIsAdmin, setLoading, loading } = useAppContext();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      axios.defaults.withCredentials = true;
-      const endpoint = isLogin ? `${backendUrl}/auth/login` : `${backendUrl}/auth/register`;
-      const payload = isLogin
-        ? { email: formData.email, password: formData.password }
-        : { name: formData.name, email: formData.email, password: formData.password };
+      let response;
+      if (isLogin) {
+        response = await loginUser({ 
+          email: formData.email, 
+          password: formData.password 
+        });
+      } else {
+        response = await registerUser({ 
+          name: formData.name, 
+          email: formData.email, 
+          password: formData.password 
+        });
+      }
 
-      const { data } = await axios.post(endpoint, payload);
-
-      if (data?.user) {
-        setUser({ id: data.user.id, name: data.user.name, email: data.user.email, isAdmin: data.user.isAdmin });
+      if (response.success && response.user) {
+        setUser({ 
+          id: response.user.id, 
+          name: response.user.name, 
+          email: response.user.email, 
+          isAdmin: response.user.isAdmin 
+        });
         setIsLoggedIn(true);
-        setIsAdmin(data.user.isAdmin || false);
+        setIsAdmin(response.user.isAdmin || false);
         
         // Redirect based on admin status
-        if (data.user.isAdmin) {
+        if (response.user.isAdmin) {
           navigate('/admin-dashboard');
         } else {
           navigate('/');
@@ -50,14 +62,14 @@ const Login = () => {
       toast({
         title: isLogin ? "Login successful" : "Account created",
         description: isLogin
-          ? `Welcome back${data?.user?.name ? ", " + data.user.name : ""}!`
+          ? `Welcome back${response?.user?.name ? ", " + response.user.name : ""}!`
           : "You can now verify (if needed) and start writing.",
       });
       // Optionally navigate after login (not implemented yet)
-    } catch (err: unknown) {
+    } catch (err: any) {
       let msg = "Action failed";
-      if (err instanceof AxiosError) {
-        msg = err.response?.data?.message || "Action failed";
+      if (err.message) {
+        msg = err.message;
       }
       toast({
         title: "Error",

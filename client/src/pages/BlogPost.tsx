@@ -10,7 +10,7 @@ import { Card } from "@/components/ui/card";
 import { Heart, MessageCircle, Share2, Bookmark, Eye, Calendar, Send, AlertCircle } from "lucide-react";
 import { useAppContext } from "@/context/AppContext";
 import { useToast } from "@/hooks/use-toast";
-import axios from "axios";
+import apiClient from "@/services/apiClient";
 
 const BlogPost = () => {
   const { id } = useParams();
@@ -104,11 +104,9 @@ Building scalable React applications requires careful planning and adherence to 
       }
       
       try {
-        axios.defaults.withCredentials = true;
-        
         if (isPreviewMode) {
           // For preview mode, fetch all pending blogs and find the one we need
-          const response = await axios.get(`${backendUrl}/blogs/pending`);
+          const response = await apiClient.get('/blogs/pending');
           
           if (response.data.success) {
             console.log('Pending blogs received:', response.data.blogs);
@@ -150,7 +148,7 @@ Building scalable React applications requires careful planning and adherence to 
           }
         } else {
           // Regular published blog fetch
-          const response = await axios.get(`${backendUrl}/blogs/${id}`);
+          const response = await apiClient.get(`/blogs/${id}`);
           
           if (response.data.success) {
             const blogData = response.data.blog;
@@ -225,8 +223,7 @@ Building scalable React applications requires careful planning and adherence to 
     }
 
     try {
-      axios.defaults.withCredentials = true;
-      const response = await axios.post(`${backendUrl}/blogs/${id}/like`);
+      const response = await apiClient.post(`/blogs/${id}/like`);
       
       if (response.data.success) {
         setIsLiked(response.data.isLiked);
@@ -277,8 +274,7 @@ Building scalable React applications requires careful planning and adherence to 
 
     setSubmittingComment(true);
     try {
-      axios.defaults.withCredentials = true;
-      const response = await axios.post(`${backendUrl}/blogs/${id}/comments`, {
+      const response = await apiClient.post(`/blogs/${id}/comments`, {
         text: newComment.trim()
       });
       
