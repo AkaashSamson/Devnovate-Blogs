@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Edit, Eye, Clock, Heart, MessageCircle, Loader2, User } from "lucide-react";
+import { Settings, Edit, Eye, Clock, Heart, MessageCircle, Loader2, User, FileText, Trash2, Shield, MapPin, ExternalLink, Calendar } from "lucide-react";
 import BlogCard from "@/components/BlogCard";
 import { useAppContext } from "@/context/AppContext";
 import { useToast } from "@/hooks/use-toast";
@@ -60,6 +60,26 @@ const Profile = () => {
     fetchUserData();
   }, [isLoggedIn, backendUrl, toast]);
 
+  // Fetch user's own blogs
+  useEffect(() => {
+    const fetchUserBlogs = async () => {
+      if (!isLoggedIn) return;
+      
+      try {
+        axios.defaults.withCredentials = true;
+        const response = await axios.get(`${backendUrl}/blogs/my-blogs`);
+        
+        if (response.data.success) {
+          setUserBlogs(response.data.blogs);
+        }
+      } catch (error: any) {
+        console.error('Error fetching user blogs:', error);
+      }
+    };
+
+    fetchUserBlogs();
+  }, [isLoggedIn, backendUrl]);
+
   // Create user object with fallbacks to dummy data
   const displayUser = {
     name: profileData?.name || user?.name || "John Doe",
@@ -79,51 +99,22 @@ const Profile = () => {
     }
   };
 
-  const publishedArticles = [
-    {
-      id: "1",
-      title: "Building Scalable React Applications with TypeScript",
-      excerpt: "Learn how to structure your React applications for scale using TypeScript, proper component architecture, and modern development patterns.",
-      author: displayUser,
-      publishedAt: "2 days ago",
-      readTime: "8 min read",
-      tags: ["React", "TypeScript", "Architecture"],
-      likes: 245,
-      comments: 18,
-      views: 1200,
-      coverImage: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&h=450&fit=crop"
-    },
-    {
-      id: "2",
-      title: "Modern CSS Techniques Every Developer Should Know",
-      excerpt: "Explore the latest CSS features including Grid, Flexbox, Custom Properties, and Container Queries.",
-      author: displayUser,
-      publishedAt: "1 week ago",
-      readTime: "12 min read",
-      tags: ["CSS", "Frontend", "Web Design"],
-      likes: 189,
-      comments: 24,
-      views: 890,
-      coverImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=450&fit=crop"
-    }
-  ];
+  // Separate blogs by status
+  const publishedArticles = userBlogs.filter(blog => blog.status === 'approved');
+  const draftArticles = userBlogs.filter(blog => blog.status === 'pending');
+  const rejectedArticles = userBlogs.filter(blog => blog.status === 'rejected');
 
-  const draftArticles = [
-    {
-      id: "draft-1",
-      title: "Advanced React Patterns You Should Know",
-      excerpt: "Exploring render props, compound components, and other advanced React patterns for better code organization.",
-      status: "Draft",
-      lastModified: "1 day ago"
-    },
-    {
-      id: "draft-2", 
-      title: "Understanding TypeScript Generics",
-      excerpt: "A deep dive into TypeScript generics with practical examples and use cases.",
-      status: "Under Review",
-      lastModified: "3 days ago"
-    }
-  ];
+  // Status badge component
+  const StatusBadge = ({ status }: { status: string }) => {
+    const statusConfig = {
+      pending: { label: "Under Review", variant: "secondary" as const },
+      rejected: { label: "Rejected", variant: "destructive" as const },
+      approved: { label: "Published", variant: "default" as const }
+    };
+    
+    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
+    return <Badge variant={config.variant}>{config.label}</Badge>;
+  };
 
   // Don't render if not logged in
   if (!isLoggedIn) {
@@ -259,17 +250,124 @@ const Profile = () => {
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="published" className="space-y-6">
+                    <TabsContent value="published" className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold">Published Articles</h2>
               <Button variant="gradient" asChild>
                 <Link to="/write">Write New Article</Link>
               </Button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {publishedArticles.map((article) => (
-                <BlogCard key={article.id} {...article} />
-              ))}
+            {publishedArticles.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {publishedArticles.map((article) => (
+                  <BlogCard key={article.id} {...article} />
+                ))}
+              </div>
+            ) : (
+              <Card className="p-12 text-center bg-gradient-card shadow-soft">
+                <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No published articles yet</h3>
+                <p className="text-muted-foreground mb-4">
+                  Start writing and sharing your knowledge with the community.
+                </p>
+                <Button variant="gradient" asChild>
+                  <Link to="/write">Write Your First Article</Link>
+                </Button>
+              </Card>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="drafts" className="space-y-6">
+            <h2 className="text-2xl font-bold">Drafts & Submissions</h2>
+            <div className="space-y-4">
+              {/* Pending Articles */}
+              {draftArticles.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Under Review</h3>
+                  {draftArticles.map((article) => (
+                    <Card key={article.id} className="p-6 bg-gradient-card shadow-soft mb-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h4 className="text-lg font-semibold">{article.title}</h4>
+                            <StatusBadge status={article.status} />
+                          </div>
+                          <p className="text-muted-foreground mb-3 line-clamp-2">{article.excerpt}</p>
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            {article.tags?.map((tag: string) => (
+                              <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>
+                            ))}
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            Last modified: {article.lastModified}
+                          </p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Button variant="outline" size="sm">
+                            <Eye className="h-4 w-4 mr-2" />
+                            View
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+              
+              {/* Rejected Articles */}
+              {rejectedArticles.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Rejected Articles</h3>
+                  {rejectedArticles.map((article) => (
+                    <Card key={article.id} className="p-6 bg-gradient-card shadow-soft mb-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h4 className="text-lg font-semibold">{article.title}</h4>
+                            <StatusBadge status={article.status} />
+                          </div>
+                          <p className="text-muted-foreground mb-3 line-clamp-2">{article.excerpt}</p>
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            {article.tags?.map((tag: string) => (
+                              <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>
+                            ))}
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            Last modified: {article.lastModified}
+                          </p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Button variant="outline" size="sm">
+                            <Edit className="h-4 w-4 mr-2" />
+                            Revise & Resubmit
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+              
+              {draftArticles.length === 0 && rejectedArticles.length === 0 && (
+                <Card className="p-12 text-center bg-gradient-card shadow-soft">
+                  <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No drafts or submissions</h3>
+                  <p className="text-muted-foreground mb-4">
+                    All your articles have been published. Keep writing!
+                  </p>
+                  <Button variant="gradient" asChild>
+                    <Link to="/write">Write New Article</Link>
+                  </Button>
+                </Card>
+              )}
             </div>
           </TabsContent>
           

@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import BlogCard from "@/components/BlogCard";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrendingUp, Clock, Star } from "lucide-react";
+import { useAppContext } from "@/context/AppContext";
+import axios from "axios";
 
 // Mock data - replace with real data from your backend
 const mockBlogs = [
@@ -60,6 +62,52 @@ const mockBlogs = [
 
 const Home = () => {
   const [activeTab, setActiveTab] = useState("latest");
+  const [realBlogs, setRealBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { backendUrl } = useAppContext();
+
+  // Fetch approved blogs from API
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        axios.defaults.withCredentials = true;
+        const response = await axios.get(`${backendUrl}/blogs`);
+        
+        if (response.data.success) {
+          // Transform API data to match frontend format
+          const transformedBlogs = response.data.blogs.map((blog: any) => ({
+            id: blog.id,
+            title: blog.title,
+            excerpt: blog.excerpt,
+            author: {
+              name: blog.author_name,
+              avatar: `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face` // Default avatar
+            },
+            publishedAt: new Date(blog.published_at).toLocaleDateString('en-US', { 
+              month: 'short', 
+              day: 'numeric' 
+            }),
+            readTime: `${Math.ceil(blog.excerpt.length / 200)} min read`, // Estimate read time
+            tags: blog.tags || [],
+            likes: blog.likes || 0,
+            comments: blog.comments_count || 0,
+            views: blog.views || 0,
+            coverImage: blog.featured_image || "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&h=450&fit=crop"
+          }));
+          setRealBlogs(transformedBlogs);
+        }
+      } catch (error) {
+        console.error('Error fetching blogs:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlogs();
+  }, [backendUrl]);
+
+  // Combine dummy data with real blogs
+  const allBlogs = [...mockBlogs, ...realBlogs];
 
   return (
     <div className="min-h-screen bg-background">
@@ -89,7 +137,7 @@ const Home = () => {
           
           <TabsContent value="latest" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockBlogs.map((blog) => (
+              {allBlogs.map((blog) => (
                 <BlogCard key={blog.id} {...blog} />
               ))}
             </div>
@@ -97,7 +145,7 @@ const Home = () => {
           
           <TabsContent value="trending" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockBlogs.sort((a, b) => b.likes - a.likes).map((blog) => (
+              {allBlogs.sort((a, b) => b.likes - a.likes).map((blog) => (
                 <BlogCard key={blog.id} {...blog} />
               ))}
             </div>
@@ -105,7 +153,7 @@ const Home = () => {
           
           <TabsContent value="featured" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockBlogs.filter(blog => blog.likes > 200).map((blog) => (
+              {allBlogs.filter(blog => blog.likes > 200).map((blog) => (
                 <BlogCard key={blog.id} {...blog} />
               ))}
             </div>

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, PenTool, User, LogIn, LogOut, Shield } from "lucide-react";
@@ -9,6 +9,7 @@ import axios from "axios";
 const Header = () => {
   const { isLoggedIn, setIsLoggedIn, setUser, setIsAdmin, isAdmin, backendUrl } = useAppContext();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
@@ -23,6 +24,9 @@ const Header = () => {
         title: "Logged out successfully",
         description: "You have been logged out of your account.",
       });
+      
+      // Navigate to home page
+      navigate('/');
     } catch (error) {
       console.error('Logout error:', error);
       // Even if logout fails on backend, clear frontend state
@@ -34,6 +38,9 @@ const Header = () => {
         title: "Logged out",
         description: "You have been logged out.",
       });
+      
+      // Navigate to home page even if logout request failed
+      navigate('/');
     }
   };
 

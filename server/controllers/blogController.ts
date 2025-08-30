@@ -61,6 +61,90 @@ export const listApprovedBlogs = async (_req: Request, res: Response) => {
   }
 };
 
+// Get pending blogs (admin only)
+export const listPendingBlogs = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
+    
+    // Check if user is admin
+    const user = await User.findById(userId);
+    if (!user || !user.isAdmin) {
+      return res.status(403).json({ success: false, message: 'Admin access required' });
+    }
+    
+    const blogs = await Blog.find({ status: 'pending' })
+      .populate('user_id', 'name')
+      .sort({ created_at: -1 });
+    
+    // Transform to match frontend schema expectations
+    const transformedBlogs = blogs.map(blog => ({
+      id: blog._id,
+      title: blog.title,
+      excerpt: blog.excerpt,
+      author: {
+        name: blog.author_name,
+        avatar: `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face`
+      },
+      submittedAt: new Date(blog.created_at).toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }),
+      tags: blog.tags || [],
+      wordCount: blog.content ? blog.content.split(' ').length : 0
+    }));
+    
+    return res.status(200).json({ success: true, blogs: transformedBlogs });
+  } catch (error) {
+    console.error('listPendingBlogs error:', error);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+// Get user's own blogs with all statuses
+export const getUserBlogs = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
+    
+    const blogs = await Blog.find({ user_id: userId })
+      .sort({ created_at: -1 });
+    
+    // Transform to match frontend schema expectations
+    const transformedBlogs = blogs.map(blog => ({
+      id: blog._id,
+      title: blog.title,
+      excerpt: blog.excerpt,
+      author: {
+        name: blog.author_name,
+        avatar: `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face`
+      },
+      publishedAt: blog.published_at ? new Date(blog.published_at).toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric' 
+      }) : null,
+      lastModified: new Date(blog.updated_at || blog.created_at).toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric' 
+      }),
+      readTime: `${Math.ceil((blog.content?.length || 0) / 1000)} min read`,
+      tags: blog.tags || [],
+      likes: blog.likes_coll.length,
+      comments: blog.comments_coll.length,
+      views: blog.views,
+      status: blog.status,
+      coverImage: blog.featured_image || "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&h=450&fit=crop"
+    }));
+    
+    return res.status(200).json({ success: true, blogs: transformedBlogs });
+  } catch (error) {
+    console.error('getUserBlogs error:', error);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
 // Get single blog (approved or owned)
 export const getBlog = async (req: Request, res: Response) => {
   try {
@@ -195,12 +279,22 @@ export const addComment = async (req: Request, res: Response) => {
   }
 };
 
-// Approve blog (admin placeholder)
+// Approve blog (admin only)
 export const approveBlog = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const userId = (req as any).userId;
+    if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
+    
+    // Check if user is admin
+    const user = await User.findById(userId);
+    if (!user || !user.isAdmin) {
+      return res.status(403).json({ success: false, message: 'Admin access required' });
+    }
+    
     const blog = await Blog.findById(id);
     if (!blog) return res.status(404).json({ success: false, message: 'Blog not found' });
+    
     blog.status = 'approved';
     blog.published_at = new Date();
     await blog.save();
@@ -211,12 +305,22 @@ export const approveBlog = async (req: Request, res: Response) => {
   }
 };
 
-// Reject blog (admin placeholder)
+// Reject blog (admin only)
 export const rejectBlog = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const userId = (req as any).userId;
+    if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
+    
+    // Check if user is admin
+    const user = await User.findById(userId);
+    if (!user || !user.isAdmin) {
+      return res.status(403).json({ success: false, message: 'Admin access required' });
+    }
+    
     const blog = await Blog.findById(id);
     if (!blog) return res.status(404).json({ success: false, message: 'Blog not found' });
+    
     blog.status = 'rejected';
     await blog.save();
     return res.status(200).json({ success: true, blog });
