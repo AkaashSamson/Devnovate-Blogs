@@ -32,6 +32,42 @@ const createBlog = async (req, res) => {
   }
 };
 
+// Get trending blogs (public, only approved, sorted by engagement)
+const getTrendingBlogs = async (req, res) => {
+  try {
+    const blogs = await Blog.find({ status: 'approved' })
+      .populate('user_id', 'name')
+      .sort({ published_at: -1 });
+    
+    // Calculate trending score and transform to match frontend schema
+    const transformedBlogs = blogs.map(blog => {
+      const trendingScore = blog.likes_coll.length + blog.comments_coll.length + Math.floor(blog.views / 10);
+      
+      return {
+        id: blog._id,
+        title: blog.title,
+        excerpt: blog.excerpt,
+        author_name: blog.author_name,
+        tags: blog.tags,
+        featured_image: blog.featured_image,
+        views: blog.views,
+        likes: blog.likes_coll.length,
+        comments_count: blog.comments_coll.length,
+        trending_points: trendingScore,
+        published_at: blog.published_at.toISOString().split('T')[0], // YYYY-MM-DD format
+      };
+    });
+
+    // Sort by trending score (highest first)
+    transformedBlogs.sort((a, b) => b.trending_points - a.trending_points);
+
+    return res.status(200).json({ success: true, blogs: transformedBlogs });
+  } catch (error) {
+    console.error('getTrendingBlogs error:', error);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
 // Get all blogs (public, only approved)
 const listApprovedBlogs = async (req, res) => {
   try {
@@ -497,6 +533,7 @@ const getPendingBlog = async (req, res) => {
 module.exports = {
   createBlog,
   listApprovedBlogs,
+  getTrendingBlogs,
   getUserBlogs,
   listPendingBlogs,
   getPendingBlog,

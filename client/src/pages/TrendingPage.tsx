@@ -1,131 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import Header from "@/components/Header";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Heart, MessageCircle, Eye, TrendingUp, Search } from "lucide-react";
+import { useAppContext } from "@/context/AppContext";
+import { useToast } from "@/hooks/use-toast";
 
-// Mock data for demo (replace later with real backend data)
-const rawBlogs = [
-  {
-    id: "1",
-    title: "Optimizing React for High-Performance Applications",
-    excerpt:
-      "Learn practical strategies to make your React apps blazing fast with memoization, code splitting, and more.",
-    author_name: "Alice Green",
-    tags: ["React", "Performance", "Frontend"],
-    featured_image:
-      "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&h=450&fit=crop",
-    views: 2200,
-    likes: 350,
-    comments_count: 42,
-    published_at: "2025-08-20",
-  },
-  {
-    id: "2",
-    title: "Exploring the Future of TypeScript in 2025",
-    excerpt:
-      "Dive into the latest features and community trends that are shaping the TypeScript ecosystem.",
-    author_name: "David Kim",
-    tags: ["TypeScript", "Web Dev"],
-    featured_image:
-      "https://images.unsplash.com/photo-1522199710521-72d69614c702?w=800&h=450&fit=crop",
-    views: 1800,
-    likes: 290,
-    comments_count: 33,
-    published_at: "2025-08-18",
-  },
-  {
-    id: "3",
-    title: "10 Tailwind CSS Tricks Every Developer Should Know",
-    excerpt:
-      "Discover hidden gems and advanced tips in Tailwind CSS to speed up your workflow.",
-    author_name: "Maria Lopez",
-    tags: ["Tailwind", "CSS", "Design"],
-    featured_image:
-      "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=450&fit=crop",
-    views: 1500,
-    likes: 210,
-    comments_count: 21,
-    published_at: "2025-08-15",
-  },
-  {
-    id: "4",
-    title: "Mastering Git: Pro Tips for Developers",
-    excerpt:
-      "Learn advanced Git commands, workflows, and tricks to boost your productivity and collaboration.",
-    author_name: "James Parker",
-    tags: ["Git", "Version Control", "Collaboration"],
-    featured_image:
-      "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=450&fit=crop",
-    views: 2300,
-    likes: 340,
-    comments_count: 45,
-    published_at: "2025-08-20",
-  },
-  {
-    id: "5",
-    title: "React Performance Optimization Guide",
-    excerpt:
-      "From code splitting to memoization, explore techniques to make your React apps lightning fast.",
-    author_name: "Sophia Kim",
-    tags: ["React", "Performance", "JavaScript"],
-    featured_image:
-      "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=450&fit=crop",
-    views: 3100,
-    likes: 520,
-    comments_count: 67,
-    published_at: "2025-08-22",
-  },
-  {
-    id: "6",
-    title: "Demystifying AI: What Every Developer Should Know",
-    excerpt:
-      "Artificial Intelligence is everywhere—understand the basics and its real-world applications.",
-    author_name: "Rahul Sharma",
-    tags: ["AI", "Machine Learning", "Future"],
-    featured_image:
-      "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=450&fit=crop",
-    views: 4200,
-    likes: 610,
-    comments_count: 83,
-    published_at: "2025-08-24",
-  },
-  {
-    id: "7",
-    title: "Building Scalable Apps with Firebase",
-    excerpt:
-      "Firebase offers authentication, database, hosting, and more—see how it can supercharge your app.",
-    author_name: "Emily Zhang",
-    tags: ["Firebase", "Cloud", "App Development"],
-    featured_image:
-      "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=450&fit=crop",
-    views: 1900,
-    likes: 280,
-    comments_count: 34,
-    published_at: "2025-08-26",
-  },
-  {
-    id: "8",
-    title: "The Rise of TypeScript in Modern Development",
-    excerpt:
-      "Why developers are switching to TypeScript and how it improves code safety and maintainability.",
-    author_name: "Oliver Johnson",
-    tags: ["TypeScript", "JavaScript", "Best Practices"],
-    featured_image:
-      "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&h=450&fit=crop",
-    views: 2700,
-    likes: 390,
-    comments_count: 56,
-    published_at: "2025-08-28",
-  }
-];
-
-// ⭐ Add trending_points attribute to each blog
-const blogsWithScores = rawBlogs.map((blog) => ({
-  ...blog,
-  trending_points: blog.likes + blog.comments_count + Math.floor(blog.views / 10),
-}));
+// Blog interface
+interface Blog {
+  id: string;
+  title: string;
+  excerpt: string;
+  author_name: string;
+  tags: string[];
+  featured_image: string;
+  views: number;
+  likes: number;
+  comments_count: number;
+  trending_points: number;
+  published_at: string;
+}
 
 // Format date
 const formatDate = (dateString: string) => {
@@ -139,9 +36,51 @@ const formatDate = (dateString: string) => {
 
 const TrendingPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { backendUrl } = useAppContext();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  // Fetch trending blogs from backend
+  useEffect(() => {
+    const fetchTrendingBlogs = async () => {
+      try {
+        axios.defaults.withCredentials = true;
+        const response = await axios.get(`${backendUrl}/blogs/trending`);
+        
+        if (response.data.success) {
+          // Add default featured image if missing
+          const blogsWithImages = response.data.blogs.map((blog: Blog) => ({
+            ...blog,
+            featured_image: blog.featured_image || "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&h=450&fit=crop"
+          }));
+          setBlogs(blogsWithImages);
+        } else {
+          throw new Error('Failed to fetch trending blogs');
+        }
+      } catch (error) {
+        console.error('Error fetching trending blogs:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load trending blogs.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrendingBlogs();
+  }, [backendUrl, toast]);
+
+  // Handle blog click
+  const handleBlogClick = (blogId: string) => {
+    navigate(`/blog/${blogId}`);
+  };
 
   // Filter blogs by title, author, or tags
-  const filteredBlogs = blogsWithScores.filter((blog) => {
+  const filteredBlogs = blogs.filter((blog) => {
     const query = searchQuery.toLowerCase();
     return (
       blog.title.toLowerCase().includes(query) ||
@@ -150,10 +89,8 @@ const TrendingPage: React.FC = () => {
     );
   });
 
-  // Sort blogs by trending_points (highest → lowest)
-  const sortedBlogs = [...filteredBlogs].sort(
-    (a, b) => b.trending_points - a.trending_points
-  );
+  // Blogs are already sorted by trending_points from the backend
+  const sortedBlogs = filteredBlogs;
 
   return (
     <div className="min-h-screen bg-background">
@@ -184,13 +121,23 @@ const TrendingPage: React.FC = () => {
 
         {/* Blog Section */}
         <div className="space-y-8">
-          {sortedBlogs.length === 0 ? (
+          {loading ? (
+            <div className="flex items-center justify-center min-h-[400px]">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-muted-foreground">Loading trending blogs...</p>
+              </div>
+            </div>
+          ) : sortedBlogs.length === 0 ? (
             <p className="text-center text-gray-600">No blogs match your search.</p>
           ) : (
             <>
               {/* Featured Blog */}
               {sortedBlogs[0] && (
-                <Card className="overflow-hidden hover:shadow-xl transition-shadow cursor-pointer">
+                <Card 
+                  className="overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
+                  onClick={() => handleBlogClick(sortedBlogs[0].id)}
+                >
                   <div className="md:flex">
                     {/* Image Section */}
                     <div className="md:w-1/2">
@@ -219,7 +166,10 @@ const TrendingPage: React.FC = () => {
                         </div>
                       </div>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mb-3 hover:text-blue-600 transition-colors cursor-pointer">
+                      <h2 
+                        className="text-2xl font-bold text-gray-900 mb-3 hover:text-blue-600 transition-colors cursor-pointer"
+                        onClick={() => handleBlogClick(sortedBlogs[0].id)}
+                      >
                         {sortedBlogs[0].title}
                       </h2>
 
@@ -267,6 +217,7 @@ const TrendingPage: React.FC = () => {
                     <Card
                       key={blog.id}
                       className="hover:shadow-lg transition-shadow cursor-pointer group"
+                      onClick={() => handleBlogClick(blog.id)}
                     >
                       <div className="relative">
                         {/* Blog Image */}
@@ -292,7 +243,10 @@ const TrendingPage: React.FC = () => {
                             {blog.trending_points}
                           </div>
                         </div>
-                        <h3 className="text-lg font-semibold group-hover:text-blue-600 transition-colors line-clamp-2">
+                        <h3 
+                          className="text-lg font-semibold group-hover:text-blue-600 transition-colors line-clamp-2"
+                          onClick={() => handleBlogClick(blog.id)}
+                        >
                           {blog.title}
                         </h3>
                         <p className="text-gray-600 text-sm line-clamp-3">

@@ -1,12 +1,9 @@
-import axios from 'axios';
-
-const backendUrl = (import.meta as any).env?.VITE_BACKEND_URL || 'http://localhost:5000/api';
+import apiClient from './apiClient';
 
 // Check if user is authenticated by calling /me endpoint
 export const checkAuthStatus = async () => {
   try {
-    axios.defaults.withCredentials = true;
-    const response = await axios.get(`${backendUrl}/users/me`);
+    const response = await apiClient.get('/users/me');
     
     if (response.data.success && response.data.user) {
       return {

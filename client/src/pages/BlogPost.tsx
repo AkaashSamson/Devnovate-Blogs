@@ -171,17 +171,17 @@ Building scalable React applications requires careful planning and adherence to 
               }) : "Recently",
               readTime: `${Math.ceil(blogData.content.length / 1000)} min read`,
               tags: blogData.tags || [],
-              likes: blogData.likes_coll?.length || 0,
-              comments: blogData.comments_coll?.length || 0,
+              likes: blogData.likes_count || 0,
+              comments: blogData.comments_count || 0,
               views: blogData.views || 0,
               coverImage: blogData.featured_image || "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=1200&h=600&fit=crop"
             });
-            setLikesCount(blogData.likes_coll?.length || 0);
-            setComments(blogData.comments_coll || []);
+            setLikesCount(blogData.likes_count || 0);
+            setComments(blogData.comments || []);
             
             // Check if user has liked this post
-            if (isLoggedIn && blogData.likes_coll) {
-              setIsLiked(false);
+            if (isLoggedIn && blogData.isLiked !== undefined) {
+              setIsLiked(blogData.isLiked);
             }
           }
         }
@@ -229,8 +229,8 @@ Building scalable React applications requires careful planning and adherence to 
       const response = await axios.post(`${backendUrl}/blogs/${id}/like`);
       
       if (response.data.success) {
-        setIsLiked(response.data.liked);
-        setLikesCount(response.data.likesCount);
+        setIsLiked(response.data.isLiked);
+        setLikesCount(response.data.likes_count);
       }
     } catch (error) {
       console.error('Error toggling like:', error);

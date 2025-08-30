@@ -15,17 +15,42 @@ connectDB();
 app.use(express.json());
 app.use(cookieParser());
 
+// Debug middleware for production troubleshooting
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  console.log('Origin:', req.headers.origin);
+  console.log('Cookies:', req.headers.cookie ? 'Present' : 'Missing');
+  console.log('Auth header:', req.headers.authorization ? 'Present' : 'Missing');
+  next();
+});
+
 // CORS configuration (SINGLE middleware) -----------------------------------
 // Include all dev client origins you might use. You can adjust CLIENT_URL in .env
 const allowedOrigins = [
   process.env.CLIENT_URL || 'http://localhost:3000',
+  'https://devnovate-blogs-eta.vercel.app', // Add your deployed frontend URL
+  'http://localhost:5173', // Vite dev server
+  'http://localhost:3000'  // React dev server
 ];
-console.log(allowedOrigins);
+console.log('Allowed origins:', allowedOrigins);
 
 app.use(
   cors({
-   origin: allowedOrigins,
-   credentials: true
+   origin: function (origin, callback) {
+     // Allow requests with no origin (like mobile apps or curl requests)
+     if (!origin) return callback(null, true);
+     
+     if (allowedOrigins.indexOf(origin) !== -1) {
+       callback(null, true);
+     } else {
+       console.log('Blocked origin:', origin);
+       callback(new Error('Not allowed by CORS'));
+     }
+   },
+   credentials: true,
+   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+   allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+   exposedHeaders: ['Set-Cookie']
   })
 );
 

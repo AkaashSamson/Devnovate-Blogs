@@ -4,6 +4,7 @@ const { optionalAuthMiddleware } = require('../middleware/optionalAuthMiddleware
 const {
   createBlog,
   listApprovedBlogs,
+  getTrendingBlogs,
   listPendingBlogs,
   getPendingBlog,
   getUserBlogs,
@@ -19,6 +20,7 @@ const {
 const router = express.Router();
 
 // Specific routes first (before parameterized routes)
+router.get('/trending', getTrendingBlogs); // Get trending blogs
 router.get('/pending', authMiddleware, listPendingBlogs); // Admin only  
 router.get('/pending/:id', authMiddleware, getPendingBlog); // Admin preview single pending blog
 router.get('/my-blogs', authMiddleware, getUserBlogs); // User's own blogs
