@@ -10,6 +10,7 @@ import BlogPost from "./pages/BlogPost";
 import Profile from "./pages/Profile";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
+import TrendingPage from "./pages/TrendingPage";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/blog/:id" element={<BlogPost />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/trending" element={<TrendingPage />} />
           <Route path="/admin" element={<AdminDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
