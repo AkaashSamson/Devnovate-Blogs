@@ -10,7 +10,7 @@ import blogRoutes from '../routes/blogRoutes';
 // dotenv.config();
 
 const app: Express = express();
-const PORT: string | number = process.env.PORT || 4000;
+const PORT: number = parseInt(process.env.PORT || '4000', 10);
 connectDB();
 
 // Parse request bodies & cookies early
@@ -48,6 +48,6 @@ app.get('/health', (_req: Request, res: Response) => {
 
 
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on PORT: ${PORT}`);
 });
