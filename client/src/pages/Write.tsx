@@ -377,22 +377,26 @@ const Write = () => {
                       className="hidden"
                       id="image-upload"
                     />
-                    <label htmlFor="image-upload">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        disabled={uploadingImage}
-                        className="cursor-pointer"
-                      >
-                        {uploadingImage ? (
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        ) : (
-                          <Upload className="h-4 w-4 mr-2" />
-                        )}
-                        {uploadingImage ? "Uploading..." : "Upload Image"}
-                      </Button>
-                    </label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={uploadingImage}
+                      className="cursor-pointer"
+                      onClick={() => {
+                        const input = document.getElementById('image-upload') as HTMLInputElement;
+                        if (input) {
+                          input.click();
+                        }
+                      }}
+                    >
+                      {uploadingImage ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Upload className="h-4 w-4 mr-2" />
+                      )}
+                      {uploadingImage ? "Uploading..." : "Upload Image"}
+                    </Button>
                     <span className="text-sm text-muted-foreground">
                       or drag & drop images here
                     </span>
