@@ -14,6 +14,7 @@ import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
+import TrendingPage from "./pages/TrendingPage";
 import LoadingSpinner from "./components/LoadingSpinner";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const AppContent = () => {
       <Route path="/profile" element={<Profile />} />
       <Route path="/profile/edit" element={<EditProfile />} />
       <Route path="/admin-dashboard" element={<AdminDashboard />} />
+      <Route path="/trending" element={<TrendingPage />} />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
     </Routes>

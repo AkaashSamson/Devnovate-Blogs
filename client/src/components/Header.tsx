@@ -1,12 +1,14 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, PenTool, User, LogIn, LogOut, Shield } from "lucide-react";
+import { Search, PenTool, User, LogIn, LogOut, Shield, Home, TrendingUp, PencilLine, Menu } from "lucide-react";
 import { useAppContext } from "@/context/AppContext";
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
+import { useState } from "react";
 
 const Header = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isLoggedIn, setIsLoggedIn, setUser, setIsAdmin, isAdmin, backendUrl } = useAppContext();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -45,72 +47,175 @@ const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b shadow-soft">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Logo */}
-        <Link to="/" className="flex items-center space-x-2">
-          <div className="bg-gradient-primary p-2 rounded-lg">
-            <PenTool className="h-6 w-6 text-primary-foreground" />
-          </div>
-          <span className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-            Devnovate    
-          </span>
-        </Link>
+    <nav className="sticky top-0 z-50 w-full backdrop-blur-md bg-white/80 border-b border-gray-200/50 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          
+          {/* Logo */}
+          <Link to="/" className="flex items-center space-x-3 cursor-pointer group">
+            <div className="relative">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                <PenTool className="w-6 h-6 text-white" />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-400 rounded-xl opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+            </div>
+            <div>
+              <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                Devnovate
+              </span>
+              <div className="text-xs text-gray-500 -mt-1">Blogs</div>
+            </div>
+          </Link>
 
-        {/* Search Bar */}
-        <div className="hidden md:flex flex-1 max-w-md mx-8">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Search articles..." 
-              className="pl-10 bg-muted/50"
-            />
+          {/* Desktop Navigation Links */}
+          <div className="hidden md:flex items-center space-x-8">
+            <Link
+              to="/"
+              className="flex items-center text-gray-700 hover:text-blue-600 transition-all duration-200 group relative"
+            >
+              <Home className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
+              <span className="font-medium">Home</span>
+              <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600 group-hover:w-full transition-all duration-300"></div>
+            </Link>
+            <Link
+              to="/trending"
+              className="flex items-center text-gray-700 hover:text-orange-600 transition-all duration-200 group relative"
+            >
+              <TrendingUp className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
+              <span className="font-medium">Trending</span>
+              <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-orange-600 to-red-600 group-hover:w-full transition-all duration-300"></div>
+            </Link>
+            <Link
+              to="/write"
+              className="flex items-center text-gray-700 hover:text-green-600 transition-all duration-200 group relative"
+            >
+              <PencilLine className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
+              <span className="font-medium">Write</span>
+              <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-green-600 to-emerald-600 group-hover:w-full transition-all duration-300"></div>
+            </Link>
+          </div>
+
+          {/* User Actions */}
+          <div className="flex items-center space-x-3">
+            {isAdmin && (
+              <Button variant="outline" asChild className="hidden sm:flex">
+                <Link to="/admin-dashboard">
+                  <Shield className="h-4 w-4 mr-2" />
+                  Dashboard
+                </Link>
+              </Button>
+            )}
+            {isLoggedIn ? (
+              <>
+                <Button 
+                  variant="ghost" 
+                  asChild
+                  className="hidden sm:flex hover:bg-gray-100 transition-all duration-200"
+                >
+                  <Link to="/profile">
+                    <User className="w-4 h-4 mr-2" />
+                    Profile
+                  </Link>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={handleLogout}
+                  className="hover:bg-red-50 hover:text-red-600 transition-all duration-200"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <Button 
+                variant="default" 
+                asChild
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+              >
+                <Link to="/login">
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Login
+                </Link>
+              </Button>
+            )}
+            
+            {/* Mobile Menu Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="md:hidden"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              <Menu className="w-5 h-5" />
+            </Button>
           </div>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex items-center space-x-4">
-          <Button variant="ghost" asChild>
-            <Link to="/trending">Trending</Link>
-          </Button>
-          <Button variant="gradient" asChild>
-            <Link to="/write">Write</Link>
-          </Button>
-          {isAdmin && (
-            <Button variant="outline" asChild>
-              <Link to="/admin-dashboard">
-                <Shield className="h-4 w-4 mr-2" />
-                Dashboard
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-gray-200 py-4">
+            <div className="flex flex-col space-y-3">
+              <Link
+                to="/"
+                className="flex items-center text-gray-700 hover:text-blue-600 transition-all duration-200 px-3 py-2 rounded-lg hover:bg-gray-50"
+              >
+                <Home className="w-4 h-4 mr-3" />
+                <span>Home</span>
               </Link>
-            </Button>
-          )}
-          {isLoggedIn ? (
-            <Button variant="ghost" size="icon" asChild>
-              <Link to="/profile">
-                <User className="h-4 w-4" />
+              <Link
+                to="/trending"
+                className="flex items-center text-gray-700 hover:text-orange-600 transition-all duration-200 px-3 py-2 rounded-lg hover:bg-gray-50"
+              >
+                <TrendingUp className="w-4 h-4 mr-3" />
+                <span>Trending</span>
               </Link>
-            </Button>
-          ) : (
-            <Button variant="ghost" size="icon" disabled>
-              <User className="h-4 w-4" />
-            </Button>
-          )}
-          {isLoggedIn ? (
-            <Button variant="outline" onClick={handleLogout}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
-          ) : (
-            <Button variant="outline" asChild>
-              <Link to="/login">
-                <LogIn className="h-4 w-4 mr-2" />
-                Login
+              <Link
+                to="/write"
+                className="flex items-center text-gray-700 hover:text-green-600 transition-all duration-200 px-3 py-2 rounded-lg hover:bg-gray-50"
+              >
+                <PencilLine className="w-4 h-4 mr-3" />
+                <span>Write</span>
               </Link>
-            </Button>
-          )}
-        </nav>
+              {isAdmin && (
+                <Link
+                  to="/admin-dashboard"
+                  className="flex items-center text-gray-700 hover:text-purple-600 transition-all duration-200 px-3 py-2 rounded-lg hover:bg-gray-50"
+                >
+                  <Shield className="w-4 h-4 mr-3" />
+                  <span>Dashboard</span>
+                </Link>
+              )}
+              {isLoggedIn ? (
+                <>
+                  <Link
+                    to="/profile"
+                    className="flex items-center text-gray-700 hover:text-blue-600 transition-all duration-200 px-3 py-2 rounded-lg hover:bg-gray-50"
+                  >
+                    <User className="w-4 h-4 mr-3" />
+                    <span>Profile</span>
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center text-gray-700 hover:text-red-600 transition-all duration-200 px-3 py-2 rounded-lg hover:bg-gray-50 text-left"
+                  >
+                    <LogOut className="w-4 h-4 mr-3" />
+                    <span>Logout</span>
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/login"
+                  className="flex items-center text-gray-700 hover:text-blue-600 transition-all duration-200 px-3 py-2 rounded-lg hover:bg-gray-50"
+                >
+                  <LogIn className="w-4 h-4 mr-3" />
+                  <span>Login</span>
+                </Link>
+              )}
+            </div>
+          </div>
+        )}
       </div>
-    </header>
+    </nav>
   );
 };
 

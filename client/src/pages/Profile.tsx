@@ -253,8 +253,8 @@ const Profile = () => {
                     <TabsContent value="published" className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold">Published Articles</h2>
-              <Button variant="gradient" asChild>
-                <Link to="/write">Write New Article</Link>
+              <Button variant="gradient">
+              <Link to="/write">Write New Article</Link>
               </Button>
             </div>
             {publishedArticles.length > 0 ? (
