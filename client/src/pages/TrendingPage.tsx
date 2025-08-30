@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Heart, MessageCircle, Eye, TrendingUp, Search } from "lucide-react";
 
 // Mock data for demo (replace later with real backend data)
-const mockTrendingBlogs = [
+const rawBlogs = [
   {
     id: "1",
     title: "Optimizing React for High-Performance Applications",
@@ -119,9 +119,15 @@ const mockTrendingBlogs = [
     comments_count: 56,
     published_at: "2025-08-28",
   }
-
 ];
 
+// ⭐ Add trending_points attribute to each blog
+const blogsWithScores = rawBlogs.map((blog) => ({
+  ...blog,
+  trending_points: blog.likes + blog.comments_count + Math.floor(blog.views / 10),
+}));
+
+// Format date
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   return date.toLocaleDateString("en-US", {
@@ -131,15 +137,11 @@ const formatDate = (dateString: string) => {
   });
 };
 
-const getTrendingScore = (blog: any) => {
-  return blog.likes + blog.comments_count + Math.floor(blog.views / 10);
-};
-
 const TrendingPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Filter blogs by title, author, or tags
-  const blogs = mockTrendingBlogs.filter((blog) => {
+  const filteredBlogs = blogsWithScores.filter((blog) => {
     const query = searchQuery.toLowerCase();
     return (
       blog.title.toLowerCase().includes(query) ||
@@ -147,6 +149,11 @@ const TrendingPage: React.FC = () => {
       blog.tags.some((tag) => tag.toLowerCase().includes(query))
     );
   });
+
+  // Sort blogs by trending_points (highest → lowest)
+  const sortedBlogs = [...filteredBlogs].sort(
+    (a, b) => b.trending_points - a.trending_points
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -156,9 +163,7 @@ const TrendingPage: React.FC = () => {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
             <TrendingUp className="w-8 h-8 text-orange-500 mr-3" />
-            <h1 className="text-3xl font-bold text-gray-900">
-              Trending Blogs
-            </h1>
+            <h1 className="text-3xl font-bold text-gray-900">Trending Blogs</h1>
           </div>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Discover the most popular and engaging content from our community
@@ -179,142 +184,150 @@ const TrendingPage: React.FC = () => {
 
         {/* Blog Section */}
         <div className="space-y-8">
-          {blogs.length === 0 ? (
-            <p className="text-center text-gray-600">
-              No blogs match your search.
-            </p>
+          {sortedBlogs.length === 0 ? (
+            <p className="text-center text-gray-600">No blogs match your search.</p>
           ) : (
             <>
               {/* Featured Blog */}
-              {blogs[0] && (
+              {sortedBlogs[0] && (
                 <Card className="overflow-hidden hover:shadow-xl transition-shadow cursor-pointer">
-  <div className="md:flex">
-    {/* Image Section */}
-    {blogs[0].featured_image && (
-      <div className="md:w-1/2">
-        <img
-          src={blogs[0].featured_image}
-          alt={blogs[0].title}
-          className="h-full w-full object-cover"
-        />
-      </div>
-    )}
+                  <div className="md:flex">
+                    {/* Image Section */}
+                    <div className="md:w-1/2">
+                      {sortedBlogs[0].featured_image && (
+                        <img
+                          src={sortedBlogs[0].featured_image}
+                          alt={sortedBlogs[0].title}
+                          className="h-full w-full object-cover"
+                        />
+                      )}
+                    </div>
 
-    {/* Content Section */}
-    <div className={`${blogs[0].featured_image ? "md:w-1/2" : "w-full"} p-6`}>
-      <div className="flex items-center mb-4">
-        <Badge className="bg-orange-100 text-orange-800 border-orange-200">
-          #1 Trending
-        </Badge>
-        <div className="ml-3 flex items-center text-sm text-orange-600">
-          <TrendingUp className="w-4 h-4 mr-1" />
-          {getTrendingScore(blogs[0])} points
-        </div>
-      </div>
+                    {/* Content Section */}
+                    <div
+                      className={`${
+                        sortedBlogs[0].featured_image ? "md:w-1/2" : "w-full"
+                      } p-6`}
+                    >
+                      <div className="flex items-center mb-4">
+                        <Badge className="bg-orange-100 text-orange-800 border-orange-200">
+                          #1 Trending
+                        </Badge>
+                        <div className="ml-3 flex items-center text-sm text-orange-600">
+                          <TrendingUp className="w-4 h-4 mr-1" />
+                          {sortedBlogs[0].trending_points} points
+                        </div>
+                      </div>
 
-      <h2 className="text-2xl font-bold text-gray-900 mb-3 hover:text-blue-600 transition-colors cursor-pointer">
-        {blogs[0].title}
-      </h2>
+                      <h2 className="text-2xl font-bold text-gray-900 mb-3 hover:text-blue-600 transition-colors cursor-pointer">
+                        {sortedBlogs[0].title}
+                      </h2>
 
-      <p className="text-gray-600 mb-4 line-clamp-3">{blogs[0].excerpt}</p>
+                      <p className="text-gray-600 mb-4 line-clamp-3">
+                        {sortedBlogs[0].excerpt}
+                      </p>
 
-      <div className="flex flex-wrap gap-2 mb-4">
-        {blogs[0].tags.slice(0, 3).map((tag) => (
-          <Badge key={tag} variant="secondary" className="text-xs">
-            {tag}
-          </Badge>
-        ))}
-      </div>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {sortedBlogs[0].tags.slice(0, 3).map((tag) => (
+                          <Badge key={tag} variant="secondary" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
 
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-gray-500">
-          By {blogs[0].author_name} • {formatDate(blogs[0].published_at)}
-        </div>
-        <div className="flex items-center space-x-4 text-sm text-gray-500">
-          <div className="flex items-center space-x-1">
-            <Heart className="w-4 h-4" />
-            <span>{blogs[0].likes}</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <MessageCircle className="w-4 h-4" />
-            <span>{blogs[0].comments_count}</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <Eye className="w-4 h-4" />
-            <span>{blogs[0].views}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</Card>
-
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm text-gray-500">
+                          By {sortedBlogs[0].author_name} •{" "}
+                          {formatDate(sortedBlogs[0].published_at)}
+                        </div>
+                        <div className="flex items-center space-x-4 text-sm text-gray-500">
+                          <div className="flex items-center space-x-1">
+                            <Heart className="w-4 h-4" />
+                            <span>{sortedBlogs[0].likes}</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <MessageCircle className="w-4 h-4" />
+                            <span>{sortedBlogs[0].comments_count}</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <Eye className="w-4 h-4" />
+                            <span>{sortedBlogs[0].views}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
               )}
 
               {/* Other Blogs */}
-              {blogs.length > 1 && (
+              {sortedBlogs.length > 1 && (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {blogs.slice(1).map((blog, index) => (
-                    <Card key={blog.id} className="hover:shadow-lg transition-shadow cursor-pointer group">
-  <div className="relative">
-    {/* Blog Image */}
-    <img
-      src={blog.featured_image}
-      alt={blog.title}
-      className="w-full h-40 object-cover rounded-t-2xl"
-    />
+                  {sortedBlogs.slice(1).map((blog, index) => (
+                    <Card
+                      key={blog.id}
+                      className="hover:shadow-lg transition-shadow cursor-pointer group"
+                    >
+                      <div className="relative">
+                        {/* Blog Image */}
+                        <img
+                          src={blog.featured_image}
+                          alt={blog.title}
+                          className="w-full h-40 object-cover rounded-t-2xl"
+                        />
 
-    {/* Ranking Badge */}
-    <div className="absolute top-3 left-3">
-      <Badge className="bg-orange-100 text-orange-800 border-orange-200">
-        #{index + 2}
-      </Badge>
-    </div>
-  </div>
+                        {/* Ranking Badge */}
+                        <div className="absolute top-3 left-3">
+                          <Badge className="bg-orange-100 text-orange-800 border-orange-200">
+                            #{index + 2}
+                          </Badge>
+                        </div>
+                      </div>
 
-  <CardHeader>
-    <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
-      <span>By {blog.author_name}</span>
-      <div className="flex items-center text-orange-600">
-        <TrendingUp className="w-3 h-3 mr-1" />
-        {getTrendingScore(blog)}
-      </div>
-    </div>
-    <h3 className="text-lg font-semibold group-hover:text-blue-600 transition-colors line-clamp-2">
-      {blog.title}
-    </h3>
-    <p className="text-gray-600 text-sm line-clamp-3">{blog.excerpt}</p>
-  </CardHeader>
+                      <CardHeader>
+                        <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
+                          <span>By {blog.author_name}</span>
+                          <div className="flex items-center text-orange-600">
+                            <TrendingUp className="w-3 h-3 mr-1" />
+                            {blog.trending_points}
+                          </div>
+                        </div>
+                        <h3 className="text-lg font-semibold group-hover:text-blue-600 transition-colors line-clamp-2">
+                          {blog.title}
+                        </h3>
+                        <p className="text-gray-600 text-sm line-clamp-3">
+                          {blog.excerpt}
+                        </p>
+                      </CardHeader>
 
-  <CardContent>
-    {blog.tags.length > 0 && (
-      <div className="flex flex-wrap gap-2 mb-4">
-        {blog.tags.slice(0, 2).map((tag) => (
-          <Badge key={tag} variant="secondary" className="text-xs">
-            {tag}
-          </Badge>
-        ))}
-      </div>
-    )}
-    <div className="flex items-center justify-between text-sm text-gray-500">
-      <div className="flex items-center space-x-3">
-        <div className="flex items-center space-x-1">
-          <Heart className="w-4 h-4" />
-          <span>{blog.likes}</span>
-        </div>
-        <div className="flex items-center space-x-1">
-          <MessageCircle className="w-4 h-4" />
-          <span>{blog.comments_count}</span>
-        </div>
-      </div>
-      <div className="flex items-center space-x-1">
-        <Eye className="w-4 h-4" />
-        <span>{blog.views}</span>
-      </div>
-    </div>
-  </CardContent>
-</Card>
-
+                      <CardContent>
+                        {blog.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            {blog.tags.slice(0, 2).map((tag) => (
+                              <Badge key={tag} variant="secondary" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                        <div className="flex items-center justify-between text-sm text-gray-500">
+                          <div className="flex items-center space-x-3">
+                            <div className="flex items-center space-x-1">
+                              <Heart className="w-4 h-4" />
+                              <span>{blog.likes}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <MessageCircle className="w-4 h-4" />
+                              <span>{blog.comments_count}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <Eye className="w-4 h-4" />
+                            <span>{blog.views}</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
               )}
