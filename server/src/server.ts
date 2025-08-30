@@ -10,7 +10,7 @@ import blogRoutes from '../routes/blogRoutes';
 // dotenv.config();
 
 const app: Express = express();
-const PORT: number = parseInt(process.env.PORT || '4000', 10);
+const PORT: number = parseInt(process.env.PORT || '10000', 10);  // Use Render's default 10000
 connectDB();
 
 // Parse request bodies & cookies early
@@ -51,10 +51,10 @@ app.get('/health', (_req: Request, res: Response) => {
     });
 });
 
-const server = app.listen(PORT, '0.0.0.0', () => {
+const server = app.listen(PORT, () => {
     console.log(`🚀 Server is running on PORT: ${PORT}`);
     console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
-    console.log(`🔗 Health check: http://0.0.0.0:${PORT}/health`);
+    console.log(`🔗 Health check: http://localhost:${PORT}/health`);
 });
 
 // Graceful shutdown
