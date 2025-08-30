@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -24,6 +25,7 @@ import axios from "axios";
 const AdminDashboard = () => {
   const { toast } = useToast();
   const { backendUrl, isAdmin } = useAppContext();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   
   const [pendingArticles, setPendingArticles] = useState([]);
@@ -101,6 +103,11 @@ const AdminDashboard = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handlePreview = (articleId: string) => {
+    // Navigate to dedicated blog preview page
+    navigate(`/admin/preview/${articleId}`);
   };
 
   return (
@@ -228,7 +235,11 @@ const AdminDashboard = () => {
                         </div>
                         
                         <div className="flex items-center space-x-2">
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handlePreview(article.id)}
+                          >
                             <Eye className="h-4 w-4 mr-2" />
                             Preview
                           </Button>

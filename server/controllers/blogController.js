@@ -433,11 +433,73 @@ const deleteBlog = async (req, res) => {
   }
 };
 
+// Get single pending blog for admin preview
+const getPendingBlog = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+
+    if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
+
+    // Check if user is admin
+    const user = await User.findById(userId);
+    if (!user || !user.isAdmin) {
+      return res.status(403).json({ success: false, message: 'Admin access required' });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid blog ID' });
+    }
+
+    const blog = await Blog.findById(id)
+      .populate('user_id', 'name email');
+
+    if (!blog) {
+      return res.status(404).json({ success: false, message: 'Blog not found' });
+    }
+
+    // Only allow access to pending blogs for admin preview
+    if (blog.status !== 'pending') {
+      return res.status(400).json({ success: false, message: 'Blog is not pending' });
+    }
+
+    const transformedBlog = {
+      id: blog._id,
+      title: blog.title,
+      content: blog.content,
+      excerpt: blog.excerpt,
+      author: {
+        name: blog.author_name,
+        avatar: `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=64&h=64&fit=crop&crop=face`,
+        bio: "Content creator"
+      },
+      tags: blog.tags || [],
+      featured_image: blog.featured_image,
+      submittedAt: new Date(blog.created_at).toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }),
+      wordCount: blog.content ? blog.content.split(' ').length : 0,
+      status: blog.status,
+      created_at: blog.created_at
+    };
+
+    return res.status(200).json({ success: true, blog: transformedBlog });
+  } catch (error) {
+    console.error('getPendingBlog error:', error);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
 module.exports = {
   createBlog,
   listApprovedBlogs,
   getUserBlogs,
   listPendingBlogs,
+  getPendingBlog,
   approveBlog,
   rejectBlog,
   getBlog,

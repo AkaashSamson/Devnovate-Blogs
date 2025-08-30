@@ -5,6 +5,7 @@ const {
   createBlog,
   listApprovedBlogs,
   listPendingBlogs,
+  getPendingBlog,
   getUserBlogs,
   getBlog,
   updateBlog,
@@ -19,6 +20,7 @@ const router = express.Router();
 
 // Specific routes first (before parameterized routes)
 router.get('/pending', authMiddleware, listPendingBlogs); // Admin only  
+router.get('/pending/:id', authMiddleware, getPendingBlog); // Admin preview single pending blog
 router.get('/my-blogs', authMiddleware, getUserBlogs); // User's own blogs
 
 // Public routes

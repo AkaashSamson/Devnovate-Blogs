@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
 import Collections from "./pages/Collections";
 import BlogPost from "./pages/BlogPost";
+import BlogPreview from "./pages/BlogPreview";
 import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -34,6 +35,7 @@ const AppContent = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/blog/:id" element={<BlogPost />} />
+      <Route path="/admin/preview/:id" element={<BlogPreview />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/profile/edit" element={<EditProfile />} />
       <Route path="/admin-dashboard" element={<AdminDashboard />} />
