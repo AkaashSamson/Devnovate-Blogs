@@ -29,8 +29,10 @@ const Hero = () => {
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
-            <Button variant="outline" size="lg" asChild>
-              <Link to="/explore">Explore Articles</Link>
+            <Button variant="outline" size="lg" onClick={() => {
+              document.getElementById("articles")?.scrollIntoView({ behavior: "smooth" });
+              }}>
+             Explore Articles
             </Button>
           </div>
           

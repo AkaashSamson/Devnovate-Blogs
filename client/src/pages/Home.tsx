@@ -67,7 +67,7 @@ const Home = () => {
       <Hero />
       
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-12">
+      <main id="articles" className="container mx-auto px-4 py-12">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-3xl font-bold">Discover Articles</h2>
