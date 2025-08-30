@@ -12,9 +12,10 @@ const Header = () => {
           <div className="bg-gradient-primary p-2 rounded-lg">
             <PenTool className="h-6 w-6 text-primary-foreground" />
           </div>
-          <span className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+          <span className="text-2xl font-bold text-white bg-gradient-to-r from-purple-500 to-pink-500 px-3 py-1 rounded-lg">
             Devnovate
           </span>
+
         </Link>
 
         {/* Search Bar */}
