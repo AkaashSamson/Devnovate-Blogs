@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,6 +7,8 @@ import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { PenTool, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import axios from "axios";
+import { useAppContext } from "@/context/AppContext";
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -17,13 +19,44 @@ const Login = () => {
     name: ""
   });
   const { toast } = useToast();
+  const { backendUrl, setUser, setLoading, loading } = useAppContext();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast({
-      title: isLogin ? "Login successful" : "Account created",
-      description: isLogin ? "Welcome back to Devnovate!" : "Welcome to Devnovate! You can now start writing.",
-    });
+  const handleSubmit = async (e: React.FormEvent) => {
+    
+    setLoading(true);
+    try {
+      e.preventDefault();
+      axios.defaults.withCredentials = true;
+      const endpoint = isLogin ? `${backendUrl}/auth/login` : `${backendUrl}/auth/register`;
+      const payload = isLogin
+        ? { email: formData.email, password: formData.password }
+        : { name: formData.name, email: formData.email, password: formData.password };
+
+      const { data } = await axios.post(endpoint, payload);
+
+      if (data?.user) {
+        setUser({ id: data.user.id, name: data.user.name, email: data.user.email });
+        navigate('/')
+      }
+
+      toast({
+        title: isLogin ? "Login successful" : "Account created",
+        description: isLogin
+          ? `Welcome back${data?.user?.name ? ", " + data.user.name : ""}!`
+          : "You can now verify (if needed) and start writing.",
+      });
+      // Optionally navigate after login (not implemented yet)
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || "Action failed";
+      toast({
+        title: "Error",
+        description: msg,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -120,8 +153,8 @@ const Login = () => {
               </div>
             )}
 
-            <Button type="submit" variant="gradient" className="w-full">
-              {isLogin ? "Sign In" : "Create Account"}
+            <Button type="submit" variant="gradient" className="w-full" disabled={loading}>
+              {loading ? (isLogin ? "Signing In..." : "Creating Account...") : (isLogin ? "Sign In" : "Create Account")}
             </Button>
 
             <div className="relative">

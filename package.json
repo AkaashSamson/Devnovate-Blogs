@@ -15,5 +15,8 @@
   "type": "commonjs",
   "dependencies": {
     "concurrently": "^9.2.1"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.9"
   }
 }
