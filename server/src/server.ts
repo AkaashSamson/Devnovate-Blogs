@@ -43,11 +43,24 @@ app.use('/api/users', userRoutes);
 app.use('/api/blogs', blogRoutes);
 
 app.get('/health', (_req: Request, res: Response) => {
-    res.status(200).send('Server is running');
+    res.status(200).json({ 
+        status: 'OK', 
+        message: 'Server is running',
+        port: PORT,
+        env: process.env.NODE_ENV 
+    });
 });
 
+const server = app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Server is running on PORT: ${PORT}`);
+    console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
+    console.log(`🔗 Health check: http://0.0.0.0:${PORT}/health`);
+});
 
-
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server is running on PORT: ${PORT}`);
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('SIGTERM received, shutting down gracefully');
+    server.close(() => {
+        console.log('Process terminated');
+    });
 });
