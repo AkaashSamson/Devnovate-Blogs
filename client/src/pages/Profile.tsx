@@ -1,27 +1,80 @@
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Edit, Eye, Clock, Heart, MessageCircle } from "lucide-react";
+import { Settings, Edit, Eye, Clock, Heart, MessageCircle, Loader2 } from "lucide-react";
 import BlogCard from "@/components/BlogCard";
+import { useAppContext } from "@/context/AppContext";
+import { useToast } from "@/hooks/use-toast";
+import axios from "axios";
 
 const Profile = () => {
-  const user = {
-    name: "Alex Johnson",
-    email: "alex.johnson@example.com",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=128&h=128&fit=crop&crop=face",
-    bio: "Full-stack developer passionate about React and TypeScript. Building scalable web applications for 5+ years.",
-    joinedDate: "January 2023",
-    location: "San Francisco, CA",
-    website: "alexjohnson.dev",
+  const [profileData, setProfileData] = useState<any>(null);
+  const [userBlogs, setUserBlogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { isLoggedIn, user, backendUrl } = useAppContext();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isLoggedIn) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to view your profile.",
+        variant: "destructive",
+      });
+      navigate("/login");
+      return;
+    }
+  }, [isLoggedIn, navigate, toast]);
+
+  // Fetch user profile data
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!isLoggedIn) return;
+      
+      try {
+        axios.defaults.withCredentials = true;
+        const response = await axios.get(`${backendUrl}/users/me`);
+        
+        if (response.data.success) {
+          setProfileData(response.data.user);
+        }
+      } catch (error: any) {
+        console.error('Error fetching user data:', error);
+        toast({
+          title: "Error loading profile",
+          description: "Failed to load profile data. Using cached information.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [isLoggedIn, backendUrl, toast]);
+
+  // Create user object with fallbacks to dummy data
+  const displayUser = {
+    name: profileData?.name || user?.name || "John Doe",
+    email: profileData?.email || user?.email || "john.doe@example.com",
+    avatar: profileData?.avatar || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=128&h=128&fit=crop&crop=face`,
+    bio: profileData?.bio || "Full-stack developer passionate about sharing knowledge through writing. Building scalable web applications and exploring new technologies.",
+    joinedDate: profileData?.createdAt ? new Date(profileData.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : "January 2024",
+    location: profileData?.location || "San Francisco, CA",
+    website: profileData?.website || "johndoe.dev",
     stats: {
-      articles: 12,
-      followers: 1420,
-      following: 89,
-      totalViews: 15600,
-      totalLikes: 892
+      articles: profileData?.stats?.articles || 8,
+      followers: profileData?.stats?.followers || 1420,
+      following: profileData?.stats?.following || 89,
+      totalViews: profileData?.stats?.totalViews || 15600,
+      totalLikes: profileData?.stats?.totalLikes || 892
     }
   };
 
@@ -30,7 +83,7 @@ const Profile = () => {
       id: "1",
       title: "Building Scalable React Applications with TypeScript",
       excerpt: "Learn how to structure your React applications for scale using TypeScript, proper component architecture, and modern development patterns.",
-      author: user,
+      author: displayUser,
       publishedAt: "2 days ago",
       readTime: "8 min read",
       tags: ["React", "TypeScript", "Architecture"],
@@ -38,6 +91,19 @@ const Profile = () => {
       comments: 18,
       views: 1200,
       coverImage: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&h=450&fit=crop"
+    },
+    {
+      id: "2",
+      title: "Modern CSS Techniques Every Developer Should Know",
+      excerpt: "Explore the latest CSS features including Grid, Flexbox, Custom Properties, and Container Queries.",
+      author: displayUser,
+      publishedAt: "1 week ago",
+      readTime: "12 min read",
+      tags: ["CSS", "Frontend", "Web Design"],
+      likes: 189,
+      comments: 24,
+      views: 890,
+      coverImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=450&fit=crop"
     }
   ];
 
@@ -58,6 +124,28 @@ const Profile = () => {
     }
   ];
 
+  // Don't render if not logged in
+  if (!isLoggedIn) {
+    return null;
+  }
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+              <p className="text-muted-foreground">Loading profile...</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -68,15 +156,15 @@ const Profile = () => {
           <Card className="p-8 bg-gradient-card shadow-medium">
             <div className="flex flex-col md:flex-row items-start md:items-center space-y-6 md:space-y-0 md:space-x-8">
               <Avatar className="h-24 w-24">
-                <AvatarImage src={user.avatar} />
+                <AvatarImage src={displayUser.avatar} />
                 <AvatarFallback className="text-2xl">
-                  {user.name.split(' ').map(n => n[0]).join('')}
+                  {displayUser.name.split(' ').map(n => n[0]).join('')}
                 </AvatarFallback>
               </Avatar>
               
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-4">
-                  <h1 className="text-3xl font-bold">{user.name}</h1>
+                  <h1 className="text-3xl font-bold">{displayUser.name}</h1>
                   <div className="flex space-x-2">
                     <Button variant="outline" size="sm">
                       <Edit className="h-4 w-4 mr-2" />
@@ -88,20 +176,24 @@ const Profile = () => {
                   </div>
                 </div>
                 
-                <p className="text-muted-foreground mb-4 max-w-2xl">{user.bio}</p>
+                <p className="text-muted-foreground mb-4 max-w-2xl">{displayUser.bio}</p>
                 
                 <div className="flex flex-wrap gap-6 text-sm">
                   <div>
                     <span className="text-muted-foreground">Joined:</span>
-                    <span className="ml-2 font-medium">{user.joinedDate}</span>
+                    <span className="ml-2 font-medium">{displayUser.joinedDate}</span>
                   </div>
                   <div>
                     <span className="text-muted-foreground">Location:</span>
-                    <span className="ml-2 font-medium">{user.location}</span>
+                    <span className="ml-2 font-medium">{displayUser.location}</span>
                   </div>
                   <div>
                     <span className="text-muted-foreground">Website:</span>
-                    <span className="ml-2 font-medium text-primary">{user.website}</span>
+                    <span className="ml-2 font-medium text-primary">{displayUser.website}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Email:</span>
+                    <span className="ml-2 font-medium">{displayUser.email}</span>
                   </div>
                 </div>
               </div>
@@ -110,23 +202,23 @@ const Profile = () => {
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-8 pt-6 border-t">
               <div className="text-center">
-                <div className="text-2xl font-bold">{user.stats.articles}</div>
+                <div className="text-2xl font-bold">{displayUser.stats.articles}</div>
                 <div className="text-sm text-muted-foreground">Articles</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold">{user.stats.followers.toLocaleString()}</div>
+                <div className="text-2xl font-bold">{displayUser.stats.followers.toLocaleString()}</div>
                 <div className="text-sm text-muted-foreground">Followers</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold">{user.stats.following}</div>
+                <div className="text-2xl font-bold">{displayUser.stats.following}</div>
                 <div className="text-sm text-muted-foreground">Following</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold">{user.stats.totalViews.toLocaleString()}</div>
+                <div className="text-2xl font-bold">{displayUser.stats.totalViews.toLocaleString()}</div>
                 <div className="text-sm text-muted-foreground">Total Views</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold">{user.stats.totalLikes}</div>
+                <div className="text-2xl font-bold">{displayUser.stats.totalLikes}</div>
                 <div className="text-sm text-muted-foreground">Total Likes</div>
               </div>
             </div>
@@ -153,8 +245,8 @@ const Profile = () => {
           <TabsContent value="published" className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold">Published Articles</h2>
-              <Button variant="gradient">
-                Write New Article
+              <Button variant="gradient" asChild>
+                <Link to="/write">Write New Article</Link>
               </Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

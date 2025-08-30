@@ -67,9 +67,17 @@ const Header = () => {
           <Button variant="gradient" asChild>
             <Link to="/write">Write</Link>
           </Button>
-          <Button variant="ghost" size="icon">
-            <User className="h-4 w-4" />
-          </Button>
+          {isLoggedIn ? (
+            <Button variant="ghost" size="icon" asChild>
+              <Link to="/profile">
+                <User className="h-4 w-4" />
+              </Link>
+            </Button>
+          ) : (
+            <Button variant="ghost" size="icon" disabled>
+              <User className="h-4 w-4" />
+            </Button>
+          )}
           {isLoggedIn ? (
             <Button variant="outline" onClick={handleLogout}>
               <LogOut className="h-4 w-4 mr-2" />
