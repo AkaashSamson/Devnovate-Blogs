@@ -12,9 +12,49 @@ import { useAppContext } from "@/context/AppContext";
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
 
+// TypeScript interfaces
+interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  bio?: string;
+  location?: string;
+  website?: string;
+  isAdmin?: boolean;
+  createdAt?: string;
+  stats?: {
+    articles?: number;
+    totalBlogs?: number;
+    followers?: number;
+    following?: number;
+    totalViews?: number;
+    totalLikes?: number;
+  };
+}
+
+interface BlogPost {
+  id: string;
+  title: string;
+  content: string;
+  status: 'pending' | 'approved' | 'rejected' | 'Draft';
+  createdAt: string;
+  updatedAt: string;
+  lastModified?: string;
+  author: {
+    id: string;
+    name: string;
+  };
+  tags?: string[];
+  excerpt?: string;
+  readTime?: number;
+  likes?: number;
+  views?: number;
+  comments?: number;
+}
+
 const Profile = () => {
-  const [profileData, setProfileData] = useState<any>(null);
-  const [userBlogs, setUserBlogs] = useState<any[]>([]);
+  const [profileData, setProfileData] = useState<UserProfile | null>(null);
+  const [userBlogs, setUserBlogs] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const { isLoggedIn, user, backendUrl } = useAppContext();
   const { toast } = useToast();
@@ -45,7 +85,7 @@ const Profile = () => {
         if (response.data.success) {
           setProfileData(response.data.user);
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Error fetching user data:', error);
         toast({
           title: "Error loading profile",
@@ -72,7 +112,7 @@ const Profile = () => {
         if (response.data.success) {
           setUserBlogs(response.data.blogs);
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Error fetching user blogs:', error);
       }
     };
@@ -260,7 +300,19 @@ const Profile = () => {
             {publishedArticles.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {publishedArticles.map((article) => (
-                  <BlogCard key={article.id} {...article} />
+                  <BlogCard 
+                    key={article.id}
+                    id={article.id}
+                    title={article.title}
+                    excerpt={article.excerpt || article.content.substring(0, 150) + '...'}
+                    author={{ name: article.author.name }}
+                    publishedAt={new Date(article.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                    readTime={`${article.readTime || Math.ceil(article.content.length / 200)} min read`}
+                    tags={article.tags || []}
+                    likes={article.likes || 0}
+                    comments={article.comments || 0}
+                    views={article.views || 0}
+                  />
                 ))}
               </div>
             ) : (

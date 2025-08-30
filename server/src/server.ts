@@ -6,6 +6,7 @@ import connectDB from '../config/mongodb';
 import authRoutes from '../routes/authRoutes';
 import userRoutes from '../routes/userRoutes';
 import blogRoutes from '../routes/blogRoutes';
+import uploadRoutes from '../routes/uploadRoutes';
 
 // dotenv.config();
 
@@ -16,13 +17,13 @@ connectDB();
 // Parse request bodies & cookies early
 app.use(express.json());
 app.use(cookieParser());
-
+app.use('/uploads', express.static('uploads'));
 // Connect to MongoDB
 
 
 // CORS configuration (SINGLE middleware) -----------------------------------
 // Include all dev client origins you might use. You can adjust CLIENT_URL in .env
-const allowedOrigins: string[] = ["http://localhost:8080"];
+const allowedOrigins: string[] = ["http://localhost:8080", "http://localhost:8081"];
 console.log(allowedOrigins);
 
 app.use(
@@ -39,6 +40,7 @@ app.use(
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/blogs', blogRoutes);
+app.use('/api/upload', uploadRoutes);
 
 app.get('/health', (_req: Request, res: Response) => {
     res.status(200).send('Server is running');

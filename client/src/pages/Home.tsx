@@ -7,7 +7,21 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrendingUp, Clock, Star, ArrowRight, Sparkles } from "lucide-react";
 import { useAppContext } from "@/context/AppContext";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
+
+// TypeScript interfaces
+interface BlogFromAPI {
+  id: string;
+  title: string;
+  excerpt: string;
+  author_name: string;
+  published_at: string;
+  tags?: string[];
+  likes?: number;
+  comments_count?: number;
+  views?: number;
+  featured_image?: string;
+}
 
 // Mock data - replace with real data from your backend
 const mockBlogs = [
@@ -124,7 +138,7 @@ const Home = () => {
         
         if (response.data.success) {
           // Transform API data to match frontend format
-          const transformedBlogs = response.data.blogs.map((blog: any) => ({
+          const transformedBlogs = response.data.blogs.map((blog: BlogFromAPI) => ({
             id: blog.id,
             title: blog.title,
             excerpt: blog.excerpt,

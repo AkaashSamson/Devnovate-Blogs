@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { PenTool, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useAppContext } from "@/context/AppContext";
 
 const Login = () => {
@@ -54,8 +54,11 @@ const Login = () => {
           : "You can now verify (if needed) and start writing.",
       });
       // Optionally navigate after login (not implemented yet)
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || "Action failed";
+    } catch (err: unknown) {
+      let msg = "Action failed";
+      if (err instanceof AxiosError) {
+        msg = err.response?.data?.message || "Action failed";
+      }
       toast({
         title: "Error",
         description: msg,

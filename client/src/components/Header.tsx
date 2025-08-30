@@ -93,16 +93,6 @@ const Header = () => {
               <span className="font-medium">Write</span>
               <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-green-600 to-emerald-600 group-hover:w-full transition-all duration-300"></div>
             </Link>
-            {isLoggedIn && (
-              <Link
-                to="/profile"
-                className="flex items-center text-gray-700 hover:text-purple-600 transition-all duration-200 group relative"
-              >
-                <User className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
-                <span className="font-medium">Profile</span>
-                <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-600 to-pink-600 group-hover:w-full transition-all duration-300"></div>
-              </Link>
-            )}
           </div>
 
           {/* User Actions */}
