@@ -6,6 +6,8 @@ import {
   getBlog,
   updateBlog,
   deleteBlog,
+  toggleLike,
+  addComment,
   approveBlog,
   rejectBlog
 } from '../controllers/blogController';
@@ -20,6 +22,10 @@ router.get('/:id', authMiddleware, getBlog); // require auth to view non-approve
 router.post('/', authMiddleware, createBlog);
 router.put('/:id', authMiddleware, updateBlog);
 router.delete('/:id', authMiddleware, deleteBlog);
+
+// Like and comment routes
+router.post('/:id/like', authMiddleware, toggleLike);
+router.post('/:id/comments', authMiddleware, addComment);
 
 // Admin placeholders (should add real admin check later)
 router.post('/:id/approve', authMiddleware, approveBlog);
