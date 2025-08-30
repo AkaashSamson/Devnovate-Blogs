@@ -6,6 +6,8 @@ import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Write from "./pages/Write";
 import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
+import Collections from "./pages/Collections";
 import BlogPost from "./pages/BlogPost";
 import Profile from "./pages/Profile";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -19,18 +21,18 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/write" element={<Write />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/blog/:id" element={<BlogPost />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/write" element={<Write />} />
+        <Route path="/collections" element={<Collections />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/blog/:id" element={<BlogPost />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </TooltipProvider>
   </QueryClientProvider>
 );

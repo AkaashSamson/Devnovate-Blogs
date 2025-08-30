@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 const Hero = () => {
   return (
-    <section className="relative py-16 sm:py-20 md:py-24 px-4 overflow-hidden">
+    <section className="relative py-16 sm:py-20 md:py-24 px-4 overflow-hidden bg-gradient-to-br from-background via-background to-muted/20">
       {/* Base Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20"></div>
       
@@ -17,22 +17,23 @@ const Hero = () => {
       ></div>
       
       {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-hero opacity-5"></div>
+      <div className="absolute inset-0 bg-gradient-hero opacity-10"></div>
+
       
       {/* Floating Elements */}
       <div className="absolute top-20 left-10 w-16 h-16 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full opacity-30 animate-pulse"></div>
       <div className="absolute top-40 right-20 w-12 h-12 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full opacity-30 animate-pulse delay-1000"></div>
       <div className="absolute bottom-20 left-1/4 w-8 h-8 bg-gradient-to-br from-pink-400/20 to-red-400/20 rounded-full opacity-30 animate-pulse delay-2000"></div>
       
-      <div className="container mx-auto text-center relative z-10">
-        <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-8 leading-loose">
-            <span className="block text-gray-900 mb-1">Share Your</span>
-            <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent animate-gradient pb-2">
+      <div className="container mx-auto text-center relative z-20">
+        <div className="max-w-4xl mx-auto relative">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-6 sm:mb-8 leading-tight">
+            Share Your
+            <span className="bg-gradient-text bg-clip-text text-transparent block animate-subtle-pulse drop-shadow-lg pb-2 sm:pb-3">
               Developer Story
             </span>
           </h1>
-          <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed px-2">
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed px-4">
             Join thousands of developers sharing knowledge, insights, and experiences. 
             Write, publish, and grow with the Devnovate community.
           </p>

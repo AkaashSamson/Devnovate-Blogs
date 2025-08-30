@@ -1,10 +1,41 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { PenTool, User, LogIn, Home, Flame, PencilLine, Menu } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Search, PenTool, User, LogIn, Home, TrendingUp, PencilLine, Menu } from "lucide-react";
+import { useAppContext } from "@/context/AppContext";
+import { useToast } from "@/hooks/use-toast";
+import axios from "axios";
 import { useState } from "react";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { isLoggedIn, setIsLoggedIn, setUser, backendUrl } = useAppContext();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      axios.defaults.withCredentials = true;
+      await axios.post(`${backendUrl}/auth/logout`);
+      
+      setIsLoggedIn(false);
+      setUser(null);
+      
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out of your account.",
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Even if logout fails on backend, clear frontend state
+      setIsLoggedIn(false);
+      setUser(null);
+      
+      toast({
+        title: "Logged out",
+        description: "You have been logged out.",
+      });
+    }
+  };
 
   return (
     <nav className="sticky top-0 z-50 w-full backdrop-blur-md bg-white/80 border-b border-gray-200/50 shadow-sm">
@@ -41,7 +72,7 @@ const Header = () => {
               to="/trending"
               className="flex items-center text-gray-700 hover:text-orange-600 transition-all duration-200 group relative"
             >
-              <Flame className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
+              <TrendingUp className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
               <span className="font-medium">Trending</span>
               <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-orange-600 to-red-600 group-hover:w-full transition-all duration-300"></div>
             </Link>
@@ -57,26 +88,38 @@ const Header = () => {
 
           {/* User Actions */}
           <div className="flex items-center space-x-3">
-            <Button 
-              variant="ghost" 
-              asChild
-              className="hidden sm:flex hover:bg-gray-100 transition-all duration-200"
-            >
-              <Link to="/profile">
-                <User className="w-4 h-4 mr-2" />
-                Profile
-              </Link>
-            </Button>
-            <Button 
-              variant="default" 
-              asChild
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
-            >
-              <Link to="/login">
-                <LogIn className="w-4 h-4 mr-2" />
-                Login
-              </Link>
-            </Button>
+            {isLoggedIn ? (
+              <>
+                <Button 
+                  variant="ghost" 
+                  asChild
+                  className="hidden sm:flex hover:bg-gray-100 transition-all duration-200"
+                >
+                  <Link to="/profile">
+                    <User className="w-4 h-4 mr-2" />
+                    Profile
+                  </Link>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={handleLogout}
+                  className="hover:bg-red-50 hover:text-red-600 transition-all duration-200"
+                >
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <Button 
+                variant="default" 
+                asChild
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+              >
+                <Link to="/login">
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Login
+                </Link>
+              </Button>
+            )}
             
             {/* Mobile Menu Button */}
             <Button
@@ -89,43 +132,58 @@ const Header = () => {
             </Button>
           </div>
         </div>
-        
+
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 bg-white/95 backdrop-blur-md">
-            <div className="px-2 pt-2 pb-3 space-y-1">
+          <div className="md:hidden border-t border-gray-200 py-4">
+            <div className="flex flex-col space-y-3">
               <Link
                 to="/"
-                className="flex items-center px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center text-gray-700 hover:text-blue-600 transition-all duration-200 px-3 py-2 rounded-lg hover:bg-gray-50"
               >
                 <Home className="w-4 h-4 mr-3" />
-                Home
+                <span>Home</span>
               </Link>
               <Link
                 to="/trending"
-                className="flex items-center px-3 py-2 text-gray-700 hover:text-orange-600 hover:bg-gray-50 rounded-md transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center text-gray-700 hover:text-orange-600 transition-all duration-200 px-3 py-2 rounded-lg hover:bg-gray-50"
               >
-                <Flame className="w-4 h-4 mr-3" />
-                Trending
+                <TrendingUp className="w-4 h-4 mr-3" />
+                <span>Trending</span>
               </Link>
               <Link
                 to="/write"
-                className="flex items-center px-3 py-2 text-gray-700 hover:text-green-600 hover:bg-gray-50 rounded-md transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center text-gray-700 hover:text-green-600 transition-all duration-200 px-3 py-2 rounded-lg hover:bg-gray-50"
               >
                 <PencilLine className="w-4 h-4 mr-3" />
-                Write
+                <span>Write</span>
               </Link>
-              <Link
-                to="/profile"
-                className="flex items-center px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <User className="w-4 h-4 mr-3" />
-                Profile
-              </Link>
+              {isLoggedIn ? (
+                <>
+                  <Link
+                    to="/profile"
+                    className="flex items-center text-gray-700 hover:text-blue-600 transition-all duration-200 px-3 py-2 rounded-lg hover:bg-gray-50"
+                  >
+                    <User className="w-4 h-4 mr-3" />
+                    <span>Profile</span>
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center text-gray-700 hover:text-red-600 transition-all duration-200 px-3 py-2 rounded-lg hover:bg-gray-50 text-left"
+                  >
+                    <LogIn className="w-4 h-4 mr-3" />
+                    <span>Logout</span>
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/login"
+                  className="flex items-center text-gray-700 hover:text-blue-600 transition-all duration-200 px-3 py-2 rounded-lg hover:bg-gray-50"
+                >
+                  <LogIn className="w-4 h-4 mr-3" />
+                  <span>Login</span>
+                </Link>
+              )}
             </div>
           </div>
         )}

@@ -4,6 +4,8 @@ import { createContext, useContext, useState, ReactNode } from 'react';
 interface AppContextValue {
     user: { id: string; name: string; email: string } | null;
     setUser: (u: AppContextValue['user']) => void;
+    isLoggedIn: boolean;
+    setIsLoggedIn: (v: boolean) => void;
     loading: boolean;
     setLoading: (v: boolean) => void;
     backendUrl: string;
@@ -16,10 +18,19 @@ interface ProviderProps { children: ReactNode }
 
 export const AppContextProvider = ({ children }: ProviderProps) => {
     const [user, setUser] = useState<AppContextValue['user']>(null);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [loading, setLoading] = useState(false);
     const backendUrl = (import.meta as any).env?.VITE_BACKEND_URL || 'http://localhost:5000/api';
 
-    const value: AppContextValue = { user, setUser, loading, setLoading, backendUrl };
+    const value: AppContextValue = { 
+        user, 
+        setUser, 
+        isLoggedIn, 
+        setIsLoggedIn, 
+        loading, 
+        setLoading, 
+        backendUrl 
+    };
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
 
