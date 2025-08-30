@@ -10,9 +10,14 @@ const blogRoutes = require('../routes/blogRoutes');
 const app = express();
 const PORT = parseInt(process.env.PORT || '10000', 10);  // Use Render's default 10000
 
-// Force production mode for deployment
-const isProduction = true; // Hardcoded for deployment
-console.log('Forced production mode:', isProduction);
+// Smart production detection for deployment
+const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER || process.env.PORT === '10000' || PORT === 10000;
+console.log('Smart production detection:', {
+    NODE_ENV: process.env.NODE_ENV,
+    RENDER: process.env.RENDER,
+    PORT: PORT,
+    isProduction: isProduction
+});
 
 connectDB();
 
@@ -33,33 +38,18 @@ app.use((req, res, next) => {
 });
 
 // CORS configuration (SINGLE middleware) -----------------------------------
-// Hardcoded production origins
-const allowedOrigins = [
-  'https://devnovate-blogs-eta.vercel.app', // Your deployed frontend
-  'http://localhost:5173', // Vite dev server (for local development)
-  'http://localhost:3000'  // React dev server (for local development)
-];
+// Smart origins based on environment
+const allowedOrigins = isProduction 
+    ? (process.env.CLIENT_URL ? [process.env.CLIENT_URL] : ['https://yourfrontendurl.com'])
+    : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174']; // Local dev origins
 
-console.log('Allowed origins (hardcoded for production):', allowedOrigins);
-console.log('Production mode forced:', isProduction);
+console.log('Allowed origins:', allowedOrigins);
+console.log('Production mode:', isProduction);
 
 app.use(
   cors({
-   origin: function (origin, callback) {
-     // Allow requests with no origin (like mobile apps, curl requests, or health checks)
-     if (!origin) return callback(null, true);
-     
-     if (allowedOrigins.indexOf(origin) !== -1) {
-       callback(null, true);
-     } else {
-       console.log('Blocked origin:', origin);
-       callback(new Error('Not allowed by CORS'));
-     }
-   },
+   origin: allowedOrigins,
    credentials: true,
-   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-   allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
-   exposedHeaders: ['Set-Cookie']
   })
 );
 

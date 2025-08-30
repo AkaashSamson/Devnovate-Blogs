@@ -24,7 +24,7 @@ export const AppContextProvider = ({ children }: ProviderProps) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true); // Start with loading true for initial auth check
-    const backendUrl = (import.meta as any).env?.VITE_BACKEND_URL || 'http://localhost:5000/api';
+    const backendUrl = (import.meta as any).env?.VITE_BACKEND_URL || 'http://localhost:10000/api';
 
     // Check authentication status on component mount
     useEffect(() => {

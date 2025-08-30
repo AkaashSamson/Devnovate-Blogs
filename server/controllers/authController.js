@@ -60,16 +60,16 @@ const register = async (req, res) => {
         // Generate JWT token
         const token = generateToken(user._id);
 
-        // Hardcoded production behavior for deployment
-        const isProduction = true;
-        console.log('Force production mode in register:', isProduction);
+        // Smart production detection for deployment
+        const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER || process.env.PORT === '10000';
+        console.log('Smart production mode in register:', isProduction);
         console.log('Sending token in register response for cross-domain compatibility');
 
-        // Always send token in response for better cross-domain compatibility
+        // Send token in response for production, or both for development compatibility
         res.status(201).json({
             success: true,
             message: 'User registered successfully. Please verify your email.',
-            token: token, // Always send token
+            token: token, // Always send token for compatibility
             user: {
                 id: user._id,
                 name: user.name,
@@ -119,9 +119,9 @@ const login = async (req, res) => {
         // Generate JWT token
         const token = generateToken(user._id);
 
-        // Hardcoded production behavior for deployment
-        const isProduction = true;
-        console.log('Force production mode in auth:', isProduction);
+        // Smart production detection for deployment
+        const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER || process.env.PORT === '10000';
+        console.log('Smart production mode in auth:', isProduction);
         console.log('Sending token in response for cross-domain compatibility');
 
         // Always send token in response for better cross-domain compatibility
@@ -147,9 +147,9 @@ const login = async (req, res) => {
 // Logout user
 const logout = async (req, res) => {
     try {
-        // Hardcoded production behavior for deployment
-        const isProduction = true;
-        console.log('Force production mode in logout:', isProduction);
+        // Smart production detection for deployment
+        const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER || process.env.PORT === '10000';
+        console.log('Smart production mode in logout:', isProduction);
         
         // Clear the token cookie (for any existing cookies)
         res.clearCookie('token', {

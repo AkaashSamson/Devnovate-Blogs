@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getAuthToken } from './tokenService';
 
-const backendUrl = (import.meta as any).env?.VITE_BACKEND_URL || 'http://localhost:5000/api';
+const backendUrl = (import.meta as any).env?.VITE_BACKEND_URL || 'http://localhost:10000/api';
 
 // Create axios instance with default config
 const apiClient = axios.create({

@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAppContext } from "@/context/AppContext";
-import axios from "axios";
+import apiClient from "@/services/apiClient";
 
 const AdminDashboard = () => {
   const { toast } = useToast();
@@ -36,8 +36,8 @@ const AdminDashboard = () => {
       if (!isAdmin) return;
       
       try {
-        axios.defaults.withCredentials = true;
-        const response = await axios.get(`${backendUrl}/blogs/pending`);
+        console.log('Fetching pending articles from:', '/blogs/pending');
+        const response = await apiClient.get('/blogs/pending');
         
         if (response.data.success) {
           setPendingArticles(response.data.blogs);
@@ -66,8 +66,8 @@ const AdminDashboard = () => {
 
   const handleApprove = async (articleId: string) => {
     try {
-      axios.defaults.withCredentials = true;
-      await axios.post(`${backendUrl}/blogs/${articleId}/approve`);
+      console.log('Approving article:', articleId);
+      await apiClient.post(`/blogs/${articleId}/approve`);
       
       setPendingArticles(prev => prev.filter(article => article.id !== articleId));
       toast({
@@ -86,8 +86,8 @@ const AdminDashboard = () => {
 
   const handleReject = async (articleId: string) => {
     try {
-      axios.defaults.withCredentials = true;
-      await axios.post(`${backendUrl}/blogs/${articleId}/reject`);
+      console.log('Rejecting article:', articleId);
+      await apiClient.post(`/blogs/${articleId}/reject`);
       
       setPendingArticles(prev => prev.filter(article => article.id !== articleId));
       toast({
