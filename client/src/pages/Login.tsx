@@ -27,30 +27,30 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4 sm:p-6">
+      <div className="w-full max-w-sm sm:max-w-md">
         {/* Logo */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6 sm:mb-8">
           <Link to="/" className="inline-flex items-center space-x-2">
-            <div className="bg-background/20 p-3 rounded-xl backdrop-blur-sm">
-              <PenTool className="h-8 w-8 text-white" />
+            <div className="bg-background/20 p-2 sm:p-3 rounded-xl backdrop-blur-sm">
+              <PenTool className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
             </div>
-            <span className="text-3xl font-bold text-white">
+            <span className="text-2xl sm:text-3xl font-bold text-white">
               Devnovate
             </span>
           </Link>
-          <p className="text-white/80 mt-2">
+          <p className="text-white/80 mt-2 text-sm sm:text-base">
             {isLogin ? "Welcome back!" : "Join the community"}
           </p>
         </div>
 
-        <Card className="p-8 bg-background/95 backdrop-blur-md shadow-strong border-0">
+        <Card className="p-6 sm:p-8 bg-background/95 backdrop-blur-md shadow-strong border-0">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="text-center mb-6">
-              <h1 className="text-2xl font-bold mb-2">
+              <h1 className="text-xl sm:text-2xl font-bold mb-2">
                 {isLogin ? "Sign In" : "Create Account"}
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground text-sm sm:text-base">
                 {isLogin 
                   ? "Enter your credentials to access your account" 
                   : "Start your journey as a developer writer"
