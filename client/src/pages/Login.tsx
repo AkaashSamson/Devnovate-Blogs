@@ -19,7 +19,7 @@ const Login = () => {
     name: ""
   });
   const { toast } = useToast();
-  const { backendUrl, setUser, setLoading, loading } = useAppContext();
+  const { backendUrl, setUser, setIsLoggedIn, setLoading, loading } = useAppContext();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,7 +37,8 @@ const Login = () => {
 
       if (data?.user) {
         setUser({ id: data.user.id, name: data.user.name, email: data.user.email });
-        navigate('/')
+        setIsLoggedIn(true);
+        navigate('/');
       }
 
       toast({
