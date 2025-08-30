@@ -34,7 +34,7 @@ const Header = () => {
           <Button variant="ghost" asChild>
             <Link to="/trending">Trending</Link>
           </Button>
-          <Button variant="gradient" asChild>
+          <Button variant="ghost" asChild>
             <Link to="/write">Write</Link>
           </Button>
           <Button variant="ghost" size="icon">
