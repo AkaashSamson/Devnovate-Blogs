@@ -9,6 +9,11 @@ const blogRoutes = require('../routes/blogRoutes');
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '10000', 10);  // Use Render's default 10000
+
+// Force production mode for deployment
+const isProduction = true; // Hardcoded for deployment
+console.log('Forced production mode:', isProduction);
+
 connectDB();
 
 // Parse request bodies & cookies early
@@ -28,16 +33,15 @@ app.use((req, res, next) => {
 });
 
 // CORS configuration (SINGLE middleware) -----------------------------------
-// Include all dev client origins you might use. You can adjust CLIENT_URL in .env
+// Hardcoded production origins
 const allowedOrigins = [
-  process.env.CLIENT_URL || 'http://localhost:3000',
-  'https://devnovate-blogs-eta.vercel.app', // Add your deployed frontend URL
-  'http://localhost:5173', // Vite dev server
-  'http://localhost:3000'  // React dev server
-].filter(Boolean); // Remove any undefined values
+  'https://devnovate-blogs-eta.vercel.app', // Your deployed frontend
+  'http://localhost:5173', // Vite dev server (for local development)
+  'http://localhost:3000'  // React dev server (for local development)
+];
 
-console.log('Allowed origins:', allowedOrigins);
-console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('Allowed origins (hardcoded for production):', allowedOrigins);
+console.log('Production mode forced:', isProduction);
 
 app.use(
   cors({
@@ -69,13 +73,14 @@ app.get('/health', (req, res) => {
         status: 'OK', 
         message: 'Server is running',
         port: PORT,
-        env: process.env.NODE_ENV 
+        env: isProduction ? 'production' : 'development', // Use our hardcoded value
+        mode: 'forced-production'
     });
 });
 
 const server = app.listen(PORT, () => {
     console.log(`🚀 Server is running on PORT: ${PORT}`);
-    console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
+    console.log(`🌍 Environment: ${isProduction ? 'production' : 'development'} (forced)`);
     console.log(`🔗 Health check: http://localhost:${PORT}/health`);
 });
 

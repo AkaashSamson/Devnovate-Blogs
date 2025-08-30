@@ -60,41 +60,24 @@ const register = async (req, res) => {
         // Generate JWT token
         const token = generateToken(user._id);
 
-        // For production, send token in response instead of cookie
-        if (process.env.NODE_ENV === 'production') {
-            res.status(201).json({
-                success: true,
-                message: 'User registered successfully. Please verify your email.',
-                token: token, // Send token in response for production
-                user: {
-                    id: user._id,
-                    name: user.name,
-                    email: user.email,
-                    isAccountVerified: user.isAccountVerified,
-                    isAdmin: user.isAdmin
-                }
-            });
-        } else {
-            // Set cookie for development
-            res.cookie('token', token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-                maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-            });
+        // Hardcoded production behavior for deployment
+        const isProduction = true;
+        console.log('Force production mode in register:', isProduction);
+        console.log('Sending token in register response for cross-domain compatibility');
 
-            res.status(201).json({
-                success: true,
-                message: 'User registered successfully. Please verify your email.',
-                user: {
-                    id: user._id,
-                    name: user.name,
-                    email: user.email,
-                    isAccountVerified: user.isAccountVerified,
-                    isAdmin: user.isAdmin
-                }
-            });
-        }
+        // Always send token in response for better cross-domain compatibility
+        res.status(201).json({
+            success: true,
+            message: 'User registered successfully. Please verify your email.',
+            token: token, // Always send token
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                isAccountVerified: user.isAccountVerified,
+                isAdmin: user.isAdmin
+            }
+        });
 
     } catch (error) {
         console.error('register error:', error);
@@ -136,7 +119,9 @@ const login = async (req, res) => {
         // Generate JWT token
         const token = generateToken(user._id);
 
-        console.log('NODE_ENV:', process.env.NODE_ENV);
+        // Hardcoded production behavior for deployment
+        const isProduction = true;
+        console.log('Force production mode in auth:', isProduction);
         console.log('Sending token in response for cross-domain compatibility');
 
         // Always send token in response for better cross-domain compatibility
@@ -162,11 +147,15 @@ const login = async (req, res) => {
 // Logout user
 const logout = async (req, res) => {
     try {
-        // Clear the token cookie
+        // Hardcoded production behavior for deployment
+        const isProduction = true;
+        console.log('Force production mode in logout:', isProduction);
+        
+        // Clear the token cookie (for any existing cookies)
         res.clearCookie('token', {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict'
+            secure: isProduction,
+            sameSite: isProduction ? 'none' : 'strict'
         });
 
         res.status(200).json({
